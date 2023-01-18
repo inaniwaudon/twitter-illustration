@@ -5,6 +5,7 @@ import SideNav from "./components/SideNav";
 import TweetPanel from "./components/TweetPanel";
 import { getTweets } from "./utils/api";
 import { Tweet } from "./const/types";
+import AddTweet from "./components/AddTweet";
 
 const Page = styled.div`
   background: #f9f9f9;
@@ -19,6 +20,7 @@ const SideNavWrapper = styled.div`
 
 const Main = styled.main`
   margin-left: 240px;
+  margin-right: 320px;
 `;
 
 const TweetWrapper = styled.div`
@@ -26,6 +28,31 @@ const TweetWrapper = styled.div`
   position: fixed;
   top: 0;
   right: 0;
+`;
+
+const Plus = styled.div`
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  color: #fff;
+  text-align: center;
+  border-radius: 50%;
+  background: #069;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1;
+`;
+
+const AddTweetWrapper = styled.div`
+  width: 400px;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  position: fixed;
+  right: 20px;
+  bottom: 74px;
+  z-index: 1;
 `;
 
 const Home = () => {
@@ -56,8 +83,16 @@ const Home = () => {
         />
       </Main>
       <TweetWrapper>
-        <TweetPanel selectedTweetId={selectedTweetId} />
+        <TweetPanel
+          selectedTweet={originalTweets.find(
+            (tweet) => tweet.id === selectedTweetId
+          )}
+        />
       </TweetWrapper>
+      <Plus>＋</Plus>
+      <AddTweetWrapper>
+        <AddTweet />
+      </AddTweetWrapper>
     </Page>
   );
 };

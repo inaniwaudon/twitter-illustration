@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { Work } from "@/const/types";
-import { getWorks } from "@/utils/api";
+import { getCommonTags, getWorks } from "@/utils/api";
 
 const Wrapper = styled.nav`
   height: 100vh;
@@ -31,7 +31,6 @@ const H3 = styled.h3`
 `;
 
 const WorkList = styled.ul`
-  font-size: 14px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -42,10 +41,12 @@ const WorkList = styled.ul`
 
 const WorkItem = styled.div`
   color: #333;
+  font-size: 14px;
   font-weight: bold;
 `;
 
-const CharacterList = styled.ul`
+const TagList = styled.ul`
+  font-size: 14px;
   margin: 4px 0 0 0;
   padding: 0;
   list-style: none;
@@ -54,7 +55,7 @@ const CharacterList = styled.ul`
   gap: 4px;
 `;
 
-const Character = styled.li<{ color: string }>`
+const Tag = styled.li<{ color: string }>`
   color: #fff;
   padding: 2px 10px;
   border-radius: 4px;
@@ -62,7 +63,7 @@ const Character = styled.li<{ color: string }>`
   background: ${(props) => props.color};
 `;
 
-const CharacterCheck = styled.span`
+const TagCheck = styled.span`
   width: 20px;
   display: inline-block;
 `;
@@ -77,6 +78,7 @@ const SideNav = ({
   setSelectedCharacters,
 }: SideNavProps) => {
   const [works, setWorks] = useState<Work[]>([]);
+  const [commonTags, setCommonTags] = useState<string[]>([]);
   const [colors, setColors] = useState<{ [key in string]: string }>({});
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -95,6 +97,7 @@ const SideNav = ({
       }
       setWorks(works);
       setColors(colors);
+      setCommonTags(await getCommonTags());
 
       if (searchParams.has("characters")) {
         setSelectedCharacters(searchParams.get("characters")!.split("+"));
@@ -122,29 +125,37 @@ const SideNav = ({
           {works.map((work) => (
             <li key={work.title}>
               <WorkItem>{work.title}</WorkItem>
-              <CharacterList>
+              <TagList>
                 {work.characters.map((character) => {
                   const id = getId(work, character);
                   return (
-                    <Character
+                    <Tag
                       color={colors[id]}
                       onClick={() => switchPerson(id)}
                       key={id}
                     >
-                      <CharacterCheck>
+                      <TagCheck>
                         {selectedCharacters.includes(id) ? "✓" : ""}
-                      </CharacterCheck>
+                      </TagCheck>
                       {character}
-                    </Character>
+                    </Tag>
                   );
                 })}
-              </CharacterList>
+              </TagList>
             </li>
           ))}
         </WorkList>
       </div>
       <div>
         <H3>全般</H3>
+        <TagList>
+          {commonTags.map((tag) => (
+            <Tag color="#666" key={tag}>
+              <TagCheck>{""}</TagCheck>
+              {tag}
+            </Tag>
+          ))}
+        </TagList>
       </div>
     </Wrapper>
   );
