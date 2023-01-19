@@ -13,7 +13,13 @@ const client = new Client(process.env.TWITTER_BEARER_TOKEN);
 const tweetEndpoint = "/tweet";
 const tweetCharacterEndpoint = "/tweet-character";
 
-interface TweetPostRequest {
+interface TweetGetRequest extends express.Request {
+  query: {
+    details?: string;
+  };
+}
+
+interface TweetPostRequest extends express.Request {
   body: {
     id: string;
   };
@@ -21,18 +27,27 @@ interface TweetPostRequest {
 
 router.get(
   tweetEndpoint,
-  async (req: express.Request, res: express.Response) => {
-    res.json(
-      await db.tweet.findAll({
-        raw: true,
-        include: [
-          {
-            model: db.user,
-            required: true,
-          },
-        ],
-      })
-    );
+  async (req: TweetGetRequest, res: express.Response) => {
+    if (req.query.details === "true") {
+      res.json(
+        await db.tweet.findAll({
+          raw: true,
+          include: [
+            {
+              model: db.user,
+              required: true,
+            },
+          ],
+        })
+      );
+    } else {
+      res.json(
+        await db.tweet.findAll({
+          attributes: ["id"],
+          raw: true,
+        })
+      );
+    }
   }
 );
 

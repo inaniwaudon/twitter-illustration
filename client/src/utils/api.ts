@@ -13,23 +13,35 @@ export const getCommonTags = async () => {
   return (await response.json()) as string[];
 };
 
-// tweet
-const tweetUrl = urlJoin(process.env.BACKEND_URL!, "tweet");
+const postRequestWithJson = (
+  endpoint: string,
+  body: unknown,
+  method: "GET" | "POST" = "GET"
+) => {
+  const url = urlJoin(process.env.BACKEND_URL!, endpoint);
+  return fetch(url, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+};
 
+const getRequest = (endpoint: string, params: { [key in string]: string }) => {
+  const url = urlJoin(process.env.BACKEND_URL!, endpoint);
+  const searchParams = new URLSearchParams(params);
+  return fetch(`${url}?${searchParams}`);
+};
+
+// tweet
 export const getTweets = async () => {
-  const response = await fetch(tweetUrl);
+  const response = await getRequest("tweet", { details: "true" });
   return (await response.json()) as Tweet[];
 };
 
 export const collectTweet = async (id: string) => {
-  const response = await fetch(tweetUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ id }),
-  });
-  return response;
+  return await postRequestWithJson("tweet", { id }, "POST");
 };
 
 export const getImageEndpoint = (id: string, no: number) => {

@@ -45,7 +45,6 @@ interface ImageRequest extends express.Request {
 }
 
 app.get("/image", (req: ImageRequest, res: express.Response) => {
-  console.log(req.query);
   const filepath = path.join(
     __dirname,
     `../images/${req.query.id}_${req.query.no}.jpeg`

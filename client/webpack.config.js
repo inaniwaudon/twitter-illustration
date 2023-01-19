@@ -7,13 +7,12 @@ module.exports = () => {
   const env = dotenv.config().parsed;
 
   return {
-    mode: "development",
+    mode: process.env.NODE_ENV || "development",
     entry: "./src/index.tsx",
     output: {
       path: path.join(__dirname, "dist"),
       filename: "bundle.js",
     },
-    devtool: "inline-source-map",
     module: {
       rules: [
         {
@@ -28,6 +27,7 @@ module.exports = () => {
       },
       extensions: [".ts", ".tsx", ".js"],
     },
+    devtool: "inline-source-map",
     devServer: {
       static: path.join(__dirname, "dist"),
       open: false,
