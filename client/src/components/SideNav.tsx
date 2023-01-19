@@ -1,33 +1,94 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useKeyPressEvent } from "react-use";
 import styled from "styled-components";
+import KeywordInput from "./KeywordInput";
+import Tag from "./Tag";
+import { linkColor } from "@/const/styles";
 import { Work } from "@/const/types";
-import { getCommonTags, getWorks } from "@/utils/api";
+import { getCharacterId, Mode } from "@/utils/utils";
 
 const Wrapper = styled.nav`
   height: 100vh;
-  padding: 20px 20px;
+  padding: 0 20px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+`;
+
+const Content = styled.div`
+  font-size: 14px;
+  margin: 20px 0;
   display: flex;
   flex-direction: column;
+  gap: 20px;
+`;
+
+const KeywordDescription = styled.div`
+  margin-bottom: 4px;
+`;
+
+const Header = styled.header`
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const HeaderTypeList = styled.ul`
+  list-style: none;
+  margin: 0 0 6px 0;
+  padding: 0;
+  display: flex;
   gap: 10px;
-  background: #fff;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 `;
 
-const KeywordInput = styled.input`
-  width: calc(100% - 20px);
-  padding: 4px 10px;
-  border-bottom: solid 1px #ccc;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-`;
-
-const H3 = styled.h3`
-  color: #333;
+const HeaderType = styled.li<{ selected: boolean }>`
+  line-height: 16px;
+  color: ${(props) => (props.selected ? "#333" : linkColor)};
   font-size: 16px;
-  font-weight: normal;
-  margin: 0 0 4px 0;
+  font-weight: ${(props) => (props.selected ? "bold" : "normal")};
+  margin: 0;
+
+  ${(props) =>
+    !props.selected &&
+    `text-decoration: underline;
+  text-decoration-color: #eee;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  &:hover {
+    text-decoration-color: #ccc;
+    cursor: pointer;
+  }`}
+`;
+
+const FilterTypeList = styled.ul`
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: solid 1px #666;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+`;
+
+const FilterType = styled.li<{ selected: boolean }>`
+  color: ${(props) => (props.selected ? "#fff" : linkColor)};
+  text-align: center;
+  flex-basis: 50%;
+  cursor: pointer;
+  background: ${(props) => (props.selected ? linkColor : "transparent")};
+`;
+
+const Option = styled.a`
+  color: ${linkColor};
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: #eee;
+  text-underline-offset: 4px;
+
+  &:hover {
+    text-decoration-color: #ccc;
+  }
 `;
 
 const WorkList = styled.ul`
@@ -36,74 +97,73 @@ const WorkList = styled.ul`
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 `;
 
 const WorkItem = styled.div`
-  color: #333;
-  font-size: 14px;
+  line-height: 18px;
   font-weight: bold;
 `;
 
-const TagList = styled.ul`
-  font-size: 14px;
-  margin: 4px 0 0 0;
+const TagList = styled.ul<{ mode: Mode }>`
+  margin: ${(props) =>
+    `4px ${props.mode === "tag" ? -30 : 0}px 0 ${
+      props.mode === "filter" ? -30 : 0
+    }px`};
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: 4px;
-`;
-
-const Tag = styled.li<{ color: string }>`
-  color: #fff;
-  padding: 2px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  background: ${(props) => props.color};
-`;
-
-const TagCheck = styled.span`
-  width: 20px;
-  display: inline-block;
+  transition: margin 0.15s ease-out;
 `;
 
 interface SideNavProps {
+  works: Work[];
+  tagHues: { [key in string]: number };
+  commonTags: string[];
   selectedCharacters: string[];
+  keyword: string;
   setSelectedCharacters: (value: string[]) => void;
+  setKeyword: (value: string) => void;
 }
 
 const SideNav = ({
+  works,
+  tagHues,
+  commonTags,
   selectedCharacters,
+  keyword,
   setSelectedCharacters,
+  setKeyword,
 }: SideNavProps) => {
-  const [works, setWorks] = useState<Work[]>([]);
-  const [commonTags, setCommonTags] = useState<string[]>([]);
-  const [colors, setColors] = useState<{ [key in string]: string }>({});
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const getId = (work: Work, character: string) => work.title + "/" + character;
+  const [mode, setMode] = useState<Mode>("filter");
+  const [originalMode, setOriginalMode] = useState<Mode>("filter");
+  const [filterType, setFilterType] = useState<"and" | "or">("or");
 
   useEffect(() => {
     (async () => {
-      const works = await getWorks();
-      const colors: { [key in string]: string } = {};
-      let i = 0;
-      for (const work of works) {
-        for (const character of work.characters) {
-          colors[getId(work, character)] = `hsl(${i}, 50%, 50%)`;
-          i += 20;
-        }
-      }
-      setWorks(works);
-      setColors(colors);
-      setCommonTags(await getCommonTags());
-
       if (searchParams.has("characters")) {
         setSelectedCharacters(searchParams.get("characters")!.split("+"));
       }
     })();
   }, []);
+
+  useKeyPressEvent(
+    "Meta",
+    () => {
+      setMode("tag");
+    },
+    () => {
+      setMode(originalMode);
+    }
+  );
+
+  const switchMode = (mode: Mode) => {
+    setMode(mode);
+    setOriginalMode(mode);
+  };
 
   const switchPerson = (id: string) => {
     const characters = selectedCharacters.includes(id)
@@ -111,52 +171,91 @@ const SideNav = ({
       : [...selectedCharacters, id];
     const trimedCharacters = characters.filter((item) => item.length > 0);
     setSelectedCharacters(trimedCharacters);
-    setSearchParams({ characters: trimedCharacters.join("+") });
+    setSearchParams({ filterType, characters: trimedCharacters.join("+") });
+  };
+
+  const clear = () => {
+    setSelectedCharacters([]);
+    setSearchParams({});
   };
 
   return (
     <Wrapper>
-      <div>
-        <KeywordInput type="" />
-      </div>
-      <div>
-        <H3>作品</H3>
-        <WorkList>
-          {works.map((work) => (
-            <li key={work.title}>
-              <WorkItem>{work.title}</WorkItem>
-              <TagList>
-                {work.characters.map((character) => {
-                  const id = getId(work, character);
-                  return (
-                    <Tag
-                      color={colors[id]}
-                      onClick={() => switchPerson(id)}
-                      key={id}
-                    >
-                      <TagCheck>
-                        {selectedCharacters.includes(id) ? "✓" : ""}
-                      </TagCheck>
-                      {character}
-                    </Tag>
-                  );
-                })}
-              </TagList>
-            </li>
-          ))}
-        </WorkList>
-      </div>
-      <div>
-        <H3>全般</H3>
-        <TagList>
-          {commonTags.map((tag) => (
-            <Tag color="#666" key={tag}>
-              <TagCheck>{""}</TagCheck>
-              {tag}
-            </Tag>
-          ))}
-        </TagList>
-      </div>
+      <Content>
+        <div>
+          <label>
+            <KeywordDescription>キーワード検索</KeywordDescription>
+            <KeywordInput
+              type="search"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
+          </label>
+        </div>
+        <div>
+          <Header>
+            <HeaderTypeList>
+              <HeaderType
+                selected={mode === "filter"}
+                onClick={() => switchMode("filter")}
+              >
+                絞り込み
+              </HeaderType>
+              <HeaderType
+                selected={mode === "tag"}
+                onClick={() => switchMode("tag")}
+              >
+                タグ付け
+              </HeaderType>
+            </HeaderTypeList>
+            <FilterTypeList>
+              <FilterType
+                selected={filterType === "and"}
+                onClick={() => setFilterType("and")}
+              >
+                AND
+              </FilterType>
+              <FilterType
+                selected={filterType === "or"}
+                onClick={() => setFilterType("or")}
+              >
+                OR
+              </FilterType>
+            </FilterTypeList>
+            <Option onClick={clear}>絞り込みを解除</Option>
+            <Option>タグ未設定のみ表示</Option>
+          </Header>
+          <WorkList>
+            {works.map((work) => (
+              <li key={work.title}>
+                <WorkItem>{work.title}</WorkItem>
+                <TagList mode={mode}>
+                  {work.characters.map((character) => {
+                    const id = getCharacterId(work, character);
+                    return (
+                      <Tag
+                        hue={tagHues[id]}
+                        selected={selectedCharacters.includes(id)}
+                        onClick={() => switchPerson(id)}
+                        label={character}
+                        mode={mode}
+                        key={id}
+                      />
+                    );
+                  })}
+                </TagList>
+              </li>
+            ))}
+          </WorkList>
+        </div>
+        <div>
+          <TagList mode={mode}>
+            {commonTags.map((tag) => (
+              <Tag hue={0} selected={false} label={tag} mode={mode} key={tag} />
+            ))}
+          </TagList>
+        </div>
+      </Content>
     </Wrapper>
   );
 };

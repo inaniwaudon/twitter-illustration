@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import AddTweet from "./components/AddTweet";
 import IllustList from "./components/IllustList";
 import SideNav from "./components/SideNav";
+import Status from "./components/Status";
 import TweetPanel from "./components/TweetPanel";
-import { getTweets } from "./utils/api";
-import { Tweet } from "./const/types";
-import AddTweet from "./components/AddTweet";
+import { Tweet, Work } from "./const/types";
+import { getCommonTags, getTweets, getWorks } from "./utils/api";
+import { getCharacterId } from "./utils/utils";
+
+const mainLeft = 220;
 
 const Page = styled.div`
+  color: #333;
   background: #f9f9f9;
 `;
 
@@ -19,7 +24,7 @@ const SideNavWrapper = styled.div`
 `;
 
 const Main = styled.main`
-  margin-left: 240px;
+  margin-left: ${mainLeft}px;
   margin-right: 320px;
 `;
 
@@ -30,66 +35,89 @@ const TweetWrapper = styled.div`
   right: 0;
 `;
 
-const Plus = styled.div`
-  width: 40px;
-  height: 40px;
-  line-height: 40px;
-  color: #fff;
-  text-align: center;
-  border-radius: 50%;
-  background: #069;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+const StatusWrapper = styled.div`
+  position: fixed;
+  bottom: 20px;
+  left: ${mainLeft}px;
+`;
+
+const AddTweetWrapper = styled.div`
   position: fixed;
   right: 20px;
   bottom: 20px;
   z-index: 1;
 `;
 
-const AddTweetWrapper = styled.div`
-  width: 400px;
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  position: fixed;
-  right: 20px;
-  bottom: 74px;
-  z-index: 1;
-`;
-
 const Home = () => {
   const [originalTweets, setOriginalTweets] = useState<Tweet[]>([]);
-  const [selectedTweetId, setSelectedTweetId] = useState<string>();
+  const [selectedTweetIds, setSelectedTweetIds] = useState<string[]>([]);
   const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
+  const [works, setWorks] = useState<Work[]>([]);
+  const [tagHues, setTagHues] = useState<{ [key in string]: number }>({});
+  const [commonTags, setCommonTags] = useState<string[]>([]);
+  const [keyword, setKeyword] = useState<string>("");
+  const [rowCount, setRowCount] = useState(3);
 
   useEffect(() => {
     (async () => {
+      // works, tags
+      const works = await getWorks();
+      const hues: { [key in string]: number } = {};
+      let i = 0;
+      for (const work of works) {
+        for (const character of work.characters) {
+          hues[getCharacterId(work, character)] = i;
+          i += 20;
+        }
+      }
+      setWorks(works);
+      setTagHues(hues);
+      setCommonTags(await getCommonTags());
+
+      // tweets
       setOriginalTweets(await getTweets());
     })();
   }, []);
+
+  const selectedTweet =
+    selectedTweetIds.length > 0
+      ? originalTweets.find((tweet) => tweet.id === selectedTweetIds[0])
+      : undefined;
 
   return (
     <Page>
       <SideNavWrapper>
         <SideNav
+          works={works}
+          tagHues={tagHues}
+          commonTags={commonTags}
           selectedCharacters={selectedCharacters}
+          keyword={keyword}
           setSelectedCharacters={setSelectedCharacters}
+          setKeyword={setKeyword}
         />
       </SideNavWrapper>
       <Main>
         <IllustList
           originalTweets={originalTweets}
-          selectedTweetId={selectedTweetId}
+          selectedTweetIds={selectedTweetIds}
           selectedCharacters={selectedCharacters}
-          setSelectedTweetId={setSelectedTweetId}
+          keyword={keyword}
+          rowCount={rowCount}
+          setSelectedTweetIds={setSelectedTweetIds}
         />
       </Main>
       <TweetWrapper>
         <TweetPanel
-          selectedTweet={originalTweets.find(
-            (tweet) => tweet.id === selectedTweetId
-          )}
+          selectedTweet={selectedTweet}
+          rowCount={rowCount}
+          setKeyword={setKeyword}
+          setRowCount={setRowCount}
         />
       </TweetWrapper>
-      <Plus>＋</Plus>
+      <StatusWrapper>
+        <Status />
+      </StatusWrapper>
       <AddTweetWrapper>
         <AddTweet />
       </AddTweetWrapper>

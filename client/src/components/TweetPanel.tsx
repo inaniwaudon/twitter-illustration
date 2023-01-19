@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import Readme from "@/components/Readme";
+import { linkColor } from "@/const/styles";
 import { Tweet } from "@/const/types";
 import { getImageEndpoint } from "@/utils/api";
 
@@ -9,11 +11,6 @@ const Wrapper = styled.div`
   background: #fff;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
   overflow-y: scroll;
-
-  a {
-    color: #333;
-    text-decoration: none;
-  }
 `;
 
 const Name = styled.p`
@@ -21,9 +18,23 @@ const Name = styled.p`
   margin: 0;
 `;
 
-const ScreenName = styled.p`
+const ScreenName = styled.a`
+  color: ${linkColor};
   color: #666;
-  margin: 0;
+  font-size: 14px;
+  text-decoration: underline;
+  text-decoration-color: #eee;
+  text-underline-offset: 4px;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration-color: #ccc;
+  }
+`;
+
+const MainAnchor = styled.a`
+  color: inherit;
+  text-decoration: none;
 `;
 
 const Images = styled.div`
@@ -40,9 +51,17 @@ const DateTime = styled.p`
 
 interface TweetProps {
   selectedTweet: Tweet | undefined;
+  rowCount: number;
+  setKeyword: (value: string) => void;
+  setRowCount: (value: number) => void;
 }
 
-const TweetPanel = ({ selectedTweet }: TweetProps) => {
+const TweetPanel = ({
+  selectedTweet,
+  rowCount,
+  setKeyword,
+  setRowCount,
+}: TweetProps) => {
   let dateStr = "";
   if (selectedTweet) {
     const date = new Date(selectedTweet.createdAt);
@@ -63,11 +82,15 @@ const TweetPanel = ({ selectedTweet }: TweetProps) => {
     <Wrapper>
       {selectedTweet ? (
         <>
-          <a href={url}>
-            <header>
-              <Name>{selectedTweet["User.name"]}</Name>
-              <ScreenName>@{selectedTweet["User.screenName"]}</ScreenName>
-            </header>
+          <header>
+            <Name>{selectedTweet["User.name"]}</Name>
+            <ScreenName
+              onClick={() => setKeyword(`@${selectedTweet["User.screenName"]}`)}
+            >
+              @{selectedTweet["User.screenName"]}
+            </ScreenName>
+          </header>
+          <MainAnchor href={url}>
             <p>{selectedTweet.body}</p>
             <Images>
               {[...Array(selectedTweet.imageCount)].map((_, i) => (
@@ -77,10 +100,18 @@ const TweetPanel = ({ selectedTweet }: TweetProps) => {
             <DateTime>
               <time>{dateStr}</time>
             </DateTime>
-          </a>
+          </MainAnchor>
         </>
       ) : (
-        <></>
+        <>
+          列数
+          <input
+            type="number"
+            value={rowCount}
+            onChange={(e) => setRowCount(parseInt(e.target.value))}
+          />
+          <Readme />
+        </>
       )}
     </Wrapper>
   );

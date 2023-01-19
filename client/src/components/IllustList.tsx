@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+import { defaultBoxShadow } from "@/const/styles";
 import { Tweet } from "@/const/types";
 import { getImageEndpoint } from "@/utils/api";
 
@@ -12,9 +13,8 @@ const Wrapper = styled.div`
   align-items: flex-start;
 `;
 
-const Row = styled.div`
-  width: 220px;
-  flex-basis: 1;
+const Row = styled.div<{ rowCount: number }>`
+  flex-basis: ${(props) => 100 / props.rowCount}%;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -26,11 +26,19 @@ const Illust = styled.div<{ height: number; selected: boolean }>`
   flex-grow: 0;
   border-radius: 2px;
   box-shadow: ${(props) =>
-    props.selected
-      ? "0 1px 10px rgba(0, 0, 0, 0.4)"
-      : "0 1px 2px rgba(0, 0, 0, 0.2)"};
+    props.selected ? "0 1px 10px rgba(0, 0, 0, 0.2)" : defaultBoxShadow};
   overflow: hidden;
-  transition: box-shadow 0.2s;
+  transform: scale(${(props) => (props.selected ? 0.9 : 1.0)});
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s;
+
+  &:hover {
+    box-shadow: ${(props) =>
+      props.selected
+        ? "0 1px 12px rgba(0, 0, 0, 0.2)"
+        : "0 1px 4px rgba(0, 0, 0, 0.2)"};
+    transform: scale(${(props) => (props.selected ? 0.89 : 0.98)});
+  }
 `;
 
 const Image = styled.img`
@@ -40,23 +48,34 @@ const Image = styled.img`
 
 interface IllustListProps {
   originalTweets: Tweet[];
-  selectedTweetId: string | undefined;
+  selectedTweetIds: string[];
   selectedCharacters: string[];
-  setSelectedTweetId: (value: string | undefined) => void;
+  keyword: string;
+  rowCount: number;
+  setSelectedTweetIds: (value: string[]) => void;
 }
 
 const IllustList = ({
   originalTweets,
-  selectedTweetId,
+  selectedTweetIds,
   selectedCharacters,
-  setSelectedTweetId,
+  keyword,
+  rowCount,
+  setSelectedTweetIds,
 }: IllustListProps) => {
-  const [tweetRows, setTweetRows] = useState<Tweet[][]>([]);
+  const [filteredTweets, setFilteredTweets] = useState<Tweet[]>([]);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const rows = 4;
 
   useEffect(() => {
     (async () => {
+      const keywordFilteredTweets =
+        keyword.length > 0
+          ? keyword.startsWith("@")
+            ? originalTweets.filter((tweet) =>
+                tweet["User.screenName"].startsWith(keyword.slice(1))
+              )
+            : originalTweets.filter((tweet) => tweet.body.includes(keyword))
+          : originalTweets;
       /*const filteredTweets = originalTweets.filter((tweet) =>
         selectedCharacters.some((selectedCharacter) =>
           tweet.characters
@@ -64,28 +83,38 @@ const IllustList = ({
             .includes(selectedCharacter)
         )
       );*/
-      const filteredTweets = originalTweets;
-      setTweetRows(
-        [...Array(rows)].map((_, i) =>
-          filteredTweets.filter((_, j) => j % rows === i)
-        )
-      );
+      setFilteredTweets(keywordFilteredTweets);
     })();
-  }, [originalTweets, selectedCharacters]);
+  }, [originalTweets, selectedCharacters, keyword]);
 
-  const onClickTweet = (id: string) => {
-    setSelectedTweetId(id);
+  const tweetRows = useMemo(() => {
+    // TODO: height
+    return [...Array(rowCount)].map((_, i) =>
+      filteredTweets.filter((_, j) => j % rowCount === i)
+    );
+  }, [filteredTweets, rowCount]);
+
+  const onClickTweet = (e: React.MouseEvent, id: string) => {
+    setSelectedTweetIds(
+      e.shiftKey
+        ? selectedTweetIds.includes(id)
+          ? selectedTweetIds.filter((inId) => inId !== id)
+          : [...selectedTweetIds, id]
+        : selectedTweetIds.includes(id)
+        ? []
+        : [id]
+    );
   };
 
   return (
     <Wrapper ref={wrapperRef}>
       {tweetRows.map((row, i) => (
-        <Row key={i}>
+        <Row rowCount={rowCount} key={i}>
           {row.map((tweet) => (
             <Illust
               height={200}
-              selected={tweet.id === selectedTweetId}
-              onClick={() => onClickTweet(tweet.id)}
+              selected={selectedTweetIds.includes(tweet.id)}
+              onClick={(e) => onClickTweet(e, tweet.id)}
               key={tweet.id}
             >
               <Image src={getImageEndpoint(tweet.id, 0)} alt="" />
