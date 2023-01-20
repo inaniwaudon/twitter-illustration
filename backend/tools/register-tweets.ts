@@ -1,7 +1,7 @@
 import fs from "fs";
 import { addTweet } from "../src/tweet";
 
-const src = process.argv[1];
+const src = process.argv[2];
 const json = JSON.parse(fs.readFileSync(src, "utf-8"));
 
 if (!Array.isArray(json)) {

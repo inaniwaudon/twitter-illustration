@@ -13,7 +13,9 @@ interface ImageRequest extends express.Request {
 router.get("/image", (req: ImageRequest, res: express.Response) => {
   const filepath = path.join(
     __dirname,
-    `../images/${req.query.id}_${req.query.no}.jpeg`
+    `../../images/${req.query.id}_${req.query.no}.jpeg`
   );
   res.sendFile(filepath);
 });
+
+export default router;

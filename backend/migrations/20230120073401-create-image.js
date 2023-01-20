@@ -1,7 +1,7 @@
 export default {
   async up(queryInterface, Sequelize) {
     return await queryInterface.createTable(
-      "TweetCharacters",
+      "Images",
       {
         id: {
           allowNull: false,
@@ -14,9 +14,17 @@ export default {
           references: { model: "Tweets", key: "id" },
           type: Sequelize.STRING,
         },
-        character: {
+        index: {
           allowNull: false,
-          type: Sequelize.STRING,
+          type: Sequelize.INTEGER,
+        },
+        width: {
+          allowNull: false,
+          type: Sequelize.INTEGER,
+        },
+        height: {
+          allowNull: false,
+          type: Sequelize.INTEGER,
         },
         createdAt: {
           allowNull: false,
@@ -29,14 +37,14 @@ export default {
       },
       {
         uniqueKeys: {
-          tweetCharacterKey: {
-            fields: ["tweetId", "character"],
+          tweetIndexKey: {
+            fields: ["tweetId", "index"],
           },
         },
       }
     );
   },
   async down(queryInterface, Sequelize) {
-    return await queryInterface.dropTable("TweetCharacters");
+    return await queryInterface.dropTable("Images");
   },
 };

@@ -72,7 +72,7 @@ const IllustList = ({
         keyword.length > 0
           ? keyword.startsWith("@")
             ? originalTweets.filter((tweet) =>
-                tweet["User.screenName"].startsWith(keyword.slice(1))
+                tweet.User.screenName.startsWith(keyword.slice(1))
               )
             : originalTweets.filter((tweet) => tweet.body.includes(keyword))
           : originalTweets;

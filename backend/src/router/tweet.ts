@@ -1,11 +1,9 @@
-import dotenv from "dotenv";
 import express from "express";
 import { Error404, Error500 } from "../error";
 import { addTweet } from "../tweet";
 import db from "../../models/index";
 
 const router = express.Router();
-dotenv.config();
 
 // endpoint
 const tweetEndpoint = "/tweet";
@@ -30,11 +28,17 @@ router.get(
     if (req.query.details === "true") {
       res.json(
         await db.tweet.findAll({
-          raw: true,
+          attributes: ["id", "body", "tweetCreatedAt"],
           include: [
             {
               model: db.user,
               required: true,
+              attributes: ["name", "screenName"],
+            },
+            {
+              model: db.image,
+              attributes: ["width", "height"],
+              order: ["index", "ASC"],
             },
           ],
         })

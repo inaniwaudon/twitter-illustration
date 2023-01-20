@@ -64,7 +64,7 @@ const TweetPanel = ({
 }: TweetProps) => {
   let dateStr = "";
   if (selectedTweet) {
-    const date = new Date(selectedTweet.createdAt);
+    const date = new Date(selectedTweet.tweetCreatedAt);
     const hours =
       date.getHours() > 12
         ? "午後" + (date.getHours() - 12)
@@ -75,7 +75,7 @@ const TweetPanel = ({
     }月${date.getDay()}日`;
   }
   const url = selectedTweet
-    ? `https://twitter.com/${selectedTweet["User.screenName"]}/status/${selectedTweet.id}`
+    ? `https://twitter.com/${selectedTweet.User.screenName}/status/${selectedTweet.id}`
     : "";
 
   const updateRowCount = (value: string) => {
@@ -89,17 +89,17 @@ const TweetPanel = ({
       {selectedTweet ? (
         <>
           <header>
-            <Name>{selectedTweet["User.name"]}</Name>
+            <Name>{selectedTweet.User.name}</Name>
             <ScreenName
-              onClick={() => setKeyword(`@${selectedTweet["User.screenName"]}`)}
+              onClick={() => setKeyword(`@${selectedTweet.User.screenName}`)}
             >
-              @{selectedTweet["User.screenName"]}
+              @{selectedTweet.User.screenName}
             </ScreenName>
           </header>
           <MainAnchor href={url}>
             <p>{selectedTweet.body}</p>
             <Images>
-              {[...Array(selectedTweet.imageCount)].map((_, i) => (
+              {[...Array(selectedTweet.Images.length)].map((_, i) => (
                 <img src={getImageEndpoint(selectedTweet.id, i)} key={i} />
               ))}
             </Images>

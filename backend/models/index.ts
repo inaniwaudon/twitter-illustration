@@ -1,7 +1,8 @@
 import process from "process";
 import { DataTypes, Sequelize } from "sequelize";
+import image from "./image";
 import tweet from "./tweet";
-import tweetCharacter from "./tweetCharacter";
+import tweetTag from "./tweet-tag";
 import user from "./user";
 import dbConfig from "../config/config.json";
 
@@ -21,15 +22,24 @@ if (config.use_env_variable) {
 }
 
 const db = {
-  tweet: tweet(sequelize, DataTypes),
-  tweetCharacter: tweetCharacter(sequelize, DataTypes),
-  user: user(sequelize, DataTypes),
+  image: image(sequelize),
+  tweet: tweet(sequelize),
+  tweetTag: tweetTag(sequelize),
+  user: user(sequelize),
   sequelize,
   Sequelize,
 };
 
+// relation
 db.tweet.belongsTo(db.user, {
   foreignKey: "userId",
+  targetKey: "id",
+});
+db.tweet.hasMany(db.image, {
+  foreignKey: "tweetId",
+});
+db.tweetTag.belongsTo(db.tweet, {
+  foreignKey: "tweetId",
   targetKey: "id",
 });
 

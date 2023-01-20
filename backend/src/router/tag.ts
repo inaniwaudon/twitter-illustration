@@ -16,3 +16,5 @@ router.get("/common-tag", (req: express.Request, res: express.Response) => {
   );
   res.json(commonTagJson);
 });
+
+export default router;

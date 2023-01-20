@@ -1,4 +1,5 @@
 import {
+  DataTypes,
   InferAttributes,
   InferCreationAttributes,
   Model,
@@ -12,12 +13,11 @@ interface TweetModel
   > {
   id: string;
   body: string;
-  imageCount: number;
   userId: string;
-  createdAt: string;
+  tweetCreatedAt: string;
 }
 
-const createModel = (sequelize: Sequelize, DataTypes) => {
+const createModel = (sequelize: Sequelize) => {
   const Tweet = sequelize.define<TweetModel>(
     "Tweet",
     {
@@ -30,20 +30,16 @@ const createModel = (sequelize: Sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      imageCount: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
       userId: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      createdAt: {
+      tweetCreatedAt: {
         type: DataTypes.DATE,
         allowNull: false,
       },
     },
-    { timestamps: false }
+    {}
   );
   return Tweet;
 };

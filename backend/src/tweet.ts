@@ -1,8 +1,10 @@
+import dotenv from "dotenv";
 import fs from "fs";
 import { Client } from "twitter-api-sdk";
 import { Error404, Error500 } from "./error";
 import db from "../models/index";
 
+dotenv.config();
 const client = new Client(process.env.TWITTER_BEARER_TOKEN);
 
 export const addTweet = async (id: string) => {
@@ -11,11 +13,11 @@ export const addTweet = async (id: string) => {
   try {
     tweet = await client.tweets.findTweetById(id, {
       expansions: ["attachments.media_keys", "author_id"],
-      "media.fields": ["url"],
+      "media.fields": ["url", "width", "height"],
       "tweet.fields": ["created_at"],
       "user.fields": ["id", "name", "username"],
     });
-  } catch {
+  } catch (e) {
     throw new Error404("Cannot get a tweet.");
   }
   if (tweet.includes.users === 0) {
@@ -38,16 +40,32 @@ export const addTweet = async (id: string) => {
   db.tweet.upsert({
     id: tweet.data.id,
     body: tweet.data.text,
-    imageCount: images.length,
     userId: user.id,
-    createdAt: tweet.data.created_at,
+    tweetCreatedAt: tweet.data.created_at,
   });
 
   // upload images
+  const image_objs: {
+    tweetId: string;
+    index: number;
+    width: number;
+    height: number;
+  }[] = [];
+
   for (let i = 0; i < images.length; i++) {
     const response = await fetch(images[i].url);
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     fs.writeFileSync(`./images/${tweet.data.id}_${i}.jpeg`, buffer);
+
+    image_objs.push({
+      tweetId: tweet.data.id,
+      index: i,
+      width: images[i].width,
+      height: images[i].height,
+    });
   }
+  db.image.bulkCreate(image_objs, {
+    ignoreDuplicates: true,
+  });
 };

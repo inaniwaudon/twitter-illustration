@@ -11,7 +11,7 @@ export default {
         },
         tweetId: {
           allowNull: false,
-          references: { models: "Tweets", key: "id" },
+          references: { model: "Tweets", key: "id" },
           type: Sequelize.STRING,
         },
         tag: {

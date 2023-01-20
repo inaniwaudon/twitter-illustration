@@ -7,12 +7,16 @@ export interface Work {
 export interface Tweet {
   id: string;
   body: string;
-  imageCount: number;
   userId: string;
-  createdAt: string;
-  "User.id": string;
-  "User.screenName": string;
-  "User.name": string;
+  tweetCreatedAt: string;
   characters: string[];
-  work?: string;
+  User: {
+    id: string;
+    screenName: string;
+    name: string;
+  };
+  Images: {
+    width: number;
+    height: number;
+  }[];
 }

@@ -1,4 +1,6 @@
 import express from "express";
+import imageRouter from "./router/image";
+import tagRouter from "./router/tag";
 import tweetRouter from "./router/tweet";
 
 const app = express();
@@ -11,7 +13,11 @@ app.use(
     next();
   }
 );
+
+app.use(imageRouter);
+app.use(tagRouter);
 app.use(tweetRouter);
+
 app.listen(3030, () => {
   console.log("Start on the port of 3030.");
 });

@@ -10,10 +10,6 @@ export default {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      imageCount: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-      },
       userId: {
         allowNull: false,
         references: { model: "Users", key: "id" },

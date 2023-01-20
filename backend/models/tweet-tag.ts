@@ -6,37 +6,31 @@ import {
   Sequelize,
 } from "sequelize";
 
-interface UserModel
+interface TweetTagModel
   extends Model<
-    InferAttributes<UserModel>,
-    InferCreationAttributes<UserModel>
+    InferAttributes<TweetTagModel>,
+    InferCreationAttributes<TweetTagModel>
   > {
-  id: string;
-  screenName: string;
-  name: string;
+  tweetId: string;
+  tag: string;
 }
 
 const createModel = (sequelize: Sequelize) => {
-  const User = sequelize.define<UserModel>(
-    "User",
+  const TweetTag = sequelize.define<TweetTagModel>(
+    "TweetTag",
     {
-      id: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        primaryKey: true,
-      },
-      screenName: {
+      tweetId: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      name: {
+      tag: {
         type: DataTypes.STRING,
         allowNull: false,
       },
     },
     {}
   );
-  return User;
+  return TweetTag;
 };
 
 export default createModel;
