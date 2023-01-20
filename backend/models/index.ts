@@ -37,6 +37,7 @@ db.tweet.belongsTo(db.user, {
 });
 db.tweet.hasMany(db.image, {
   foreignKey: "tweetId",
+  onDelete: "CASCADE",
 });
 db.tweetTag.belongsTo(db.tweet, {
   foreignKey: "tweetId",

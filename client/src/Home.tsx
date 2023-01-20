@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import AddTweet from "./components/AddTweet";
 import IllustList from "./components/IllustList";
 import SideNav from "./components/SideNav";
 import Status from "./components/Status";
 import TweetPanel from "./components/TweetPanel";
-import { Tweet, Work } from "./const/types";
-import { getCommonTags, getTweets, getWorks } from "./utils/api";
-import { getCharacterId } from "./utils/utils";
+import {
+  getCommonTags,
+  getTweets,
+  getTweetToTags,
+  getWorks,
+  Tweet,
+  TweetToTag,
+  Work,
+} from "./utils/api";
+import { getCharacterTag, FilterMethod, getAllTags } from "./utils/utils";
 
-const mainLeft = 220;
+const SideNavWidth = 220;
 
 const Page = styled.div`
   color: #333;
@@ -17,14 +25,14 @@ const Page = styled.div`
 `;
 
 const SideNavWrapper = styled.div`
-  width: 220px;
+  width: ${SideNavWidth}px;
   position: fixed;
   top: 0;
   left: 0;
 `;
 
 const Main = styled.main`
-  margin-left: ${mainLeft}px;
+  margin-left: ${SideNavWidth}px;
   margin-right: 320px;
 `;
 
@@ -38,7 +46,7 @@ const TweetWrapper = styled.div`
 const StatusWrapper = styled.div`
   position: fixed;
   bottom: 20px;
-  left: ${mainLeft}px;
+  left: ${SideNavWidth}px;
 `;
 
 const AddTweetWrapper = styled.div`
@@ -49,33 +57,58 @@ const AddTweetWrapper = styled.div`
 `;
 
 const Home = () => {
+  const [searchParams, _] = useSearchParams();
+
   const [originalTweets, setOriginalTweets] = useState<Tweet[]>([]);
   const [selectedTweetIds, setSelectedTweetIds] = useState<string[]>([]);
-  const [selectedCharacters, setSelectedCharacters] = useState<string[]>([]);
-  const [works, setWorks] = useState<Work[]>([]);
-  const [tagHues, setTagHues] = useState<{ [key in string]: number }>({});
-  const [commonTags, setCommonTags] = useState<string[]>([]);
   const [keyword, setKeyword] = useState<string>("");
-  const [rowCount, setRowCount] = useState(3);
+  const [columnCount, setColumnCount] = useState(3);
+
+  // tag
+  const [works, setWorks] = useState<Work[]>([]);
+  const [commonTags, setCommonTags] = useState<string[]>([]);
+  const [tagHues, setTagHues] = useState<{ [key in string]: number }>({});
+  const [tweetToTags, setTweetToTags] = useState<TweetToTag>({});
+
+  // filter
+  const [filterMethod, setFilterMethod] = useState<FilterMethod>("or");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
-      // works, tags
+      // tag
       const works = await getWorks();
       const hues: { [key in string]: number } = {};
       let i = 0;
       for (const work of works) {
         for (const character of work.characters) {
-          hues[getCharacterId(work, character)] = i;
+          hues[getCharacterTag(work, character)] = i;
           i += 20;
         }
       }
+      const tempCommonTags = await getCommonTags();
       setWorks(works);
       setTagHues(hues);
-      setCommonTags(await getCommonTags());
+      setCommonTags(tempCommonTags);
 
-      // tweets
+      // tweet, tweet-tag
       setOriginalTweets(await getTweets());
+      setTweetToTags(await getTweetToTags());
+
+      // params
+      if (searchParams.has("tags")) {
+        setSelectedTags(
+          searchParams
+            .get("tags")!
+            .split("+")
+            .filter((tag) => getAllTags(works, tempCommonTags).includes(tag))
+        );
+      }
+      if (searchParams.has("filterMethod")) {
+        setFilterMethod(
+          searchParams.get("filterMethod") === "and" ? "and" : "or"
+        );
+      }
     })();
   }, []);
 
@@ -89,30 +122,37 @@ const Home = () => {
       <SideNavWrapper>
         <SideNav
           works={works}
-          tagHues={tagHues}
           commonTags={commonTags}
-          selectedCharacters={selectedCharacters}
+          tagHues={tagHues}
+          tweetToTags={tweetToTags}
+          selectedTweetIds={selectedTweetIds}
+          selectedTags={selectedTags}
           keyword={keyword}
-          setSelectedCharacters={setSelectedCharacters}
+          filterMethod={filterMethod}
+          setTweetToTags={setTweetToTags}
+          setSelectedTags={setSelectedTags}
           setKeyword={setKeyword}
+          setFilterMethod={setFilterMethod}
         />
       </SideNavWrapper>
       <Main>
         <IllustList
           originalTweets={originalTweets}
-          selectedTweetIds={selectedTweetIds}
-          selectedCharacters={selectedCharacters}
+          tweetToTags={tweetToTags}
           keyword={keyword}
-          rowCount={rowCount}
+          columnCount={columnCount}
+          filterMethod={filterMethod}
+          selectedTweetIds={selectedTweetIds}
+          selectedTags={selectedTags}
           setSelectedTweetIds={setSelectedTweetIds}
         />
       </Main>
       <TweetWrapper>
         <TweetPanel
           selectedTweet={selectedTweet}
-          rowCount={rowCount}
+          columnCount={columnCount}
           setKeyword={setKeyword}
-          setRowCount={setRowCount}
+          setColumnCount={setColumnCount}
         />
       </TweetWrapper>
       <StatusWrapper>

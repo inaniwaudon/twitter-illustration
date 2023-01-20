@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { HiOutlinePlus } from "react-icons/hi";
 import KeywordInput from "./KeywordInput";
-import { defaultBoxShadow } from "@/const/styles";
-import { collectTweet } from "@/utils/api";
+import { defaultBoxShadow, getKeyColor } from "@/const/styles";
+import { addTweet } from "@/utils/api";
 
 const Wrapper = styled.div`
   display: flex;
@@ -20,7 +20,7 @@ const Plus = styled.div`
   color: #fff;
   text-align: center;
   border-radius: 50%;
-  background: #069;
+  background: ${getKeyColor(1.0)};
   cursor: pointer;
   box-shadow: ${defaultBoxShadow};
   z-index: 1;
@@ -65,7 +65,7 @@ const Button = styled.input`
   border: none;
   border-radius: 4px;
   box-shadow: ${defaultBoxShadow};
-  background: #069;
+  background: ${getKeyColor(1.0)};
 `;
 
 const Message = styled.p`
@@ -92,7 +92,7 @@ const AddTweet = () => {
       setMessage("https://twitter.com/... の形式で指定してください");
       return;
     }
-    const response = await collectTweet(url.split("/").at(-1)!);
+    const response = await addTweet(url.split("/").at(-1)!);
     setMessage(response.status === 204 ? "記録しました" : "記録に失敗しました");
     setUrl("");
   };

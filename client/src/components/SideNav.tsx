@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useKeyPressEvent } from "react-use";
 import styled from "styled-components";
 import KeywordInput from "./KeywordInput";
 import Tag from "./Tag";
 import { linkColor } from "@/const/styles";
-import { Work } from "@/const/types";
-import { getCharacterId, Mode } from "@/utils/utils";
+import { addTweetTag, deleteTweetTag, TweetToTag, Work } from "@/utils/api";
+import { getCharacterTag, FilterMethod, getAllTags } from "@/utils/utils";
 
 const Wrapper = styled.nav`
   height: 100vh;
@@ -33,31 +32,12 @@ const Header = styled.header`
   flex-direction: column;
 `;
 
-const HeaderTypeList = styled.ul`
-  list-style: none;
-  margin: 0 0 8px 0;
-  padding: 0;
-  display: flex;
-  gap: 10px;
-`;
-
-const HeaderType = styled.li<{ selected: boolean }>`
+const H3 = styled.h3`
   line-height: 16px;
-  color: ${(props) => (props.selected ? "#333" : linkColor)};
+  color: "#333";
   font-size: 16px;
-  font-weight: ${(props) => (props.selected ? "bold" : "normal")};
-  margin: 0;
-
-  ${(props) =>
-    !props.selected &&
-    `text-decoration: underline;
-  text-decoration-color: #eee;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
-  &:hover {
-    text-decoration-color: #ccc;
-    cursor: pointer;
-  }`}
+  font-weight: bold;
+  margin: 0 0 8px 0;
 `;
 
 const FilterTypeList = styled.ul`
@@ -108,11 +88,8 @@ const WorkItem = styled.div`
   font-weight: bold;
 `;
 
-const TagList = styled.ul<{ mode: Mode }>`
-  margin: ${(props) =>
-    `4px ${props.mode === "tag" ? -30 : 0}px 0 ${
-      props.mode === "filter" ? -30 : 0
-    }px`};
+const TagList = styled.ul`
+  margin: 4px 0px 0 -30px;
   padding: 0;
   list-style: none;
   display: flex;
@@ -123,62 +100,107 @@ const TagList = styled.ul<{ mode: Mode }>`
 
 interface SideNavProps {
   works: Work[];
-  tagHues: { [key in string]: number };
   commonTags: string[];
-  selectedCharacters: string[];
+  tagHues: { [key in string]: number };
+  tweetToTags: TweetToTag;
+  selectedTweetIds: string[];
+  selectedTags: string[];
   keyword: string;
-  setSelectedCharacters: (value: string[]) => void;
+  filterMethod: FilterMethod;
+  setTweetToTags: (value: TweetToTag) => void;
+  setSelectedTags: (value: string[]) => void;
   setKeyword: (value: string) => void;
+  setFilterMethod: (value: FilterMethod) => void;
 }
 
 const SideNav = ({
   works,
-  tagHues,
   commonTags,
-  selectedCharacters,
+  tagHues,
+  tweetToTags,
+  selectedTweetIds,
+  selectedTags,
   keyword,
-  setSelectedCharacters,
+  filterMethod,
+  setTweetToTags,
+  setSelectedTags,
   setKeyword,
+  setFilterMethod,
 }: SideNavProps) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [mode, setMode] = useState<Mode>("filter");
-  const [originalMode, setOriginalMode] = useState<Mode>("filter");
-  const [filterType, setFilterType] = useState<"and" | "or">("or");
+  const [_, setSearchParams] = useSearchParams();
+  const allTags = getAllTags(works, commonTags);
 
-  useEffect(() => {
-    (async () => {
-      if (searchParams.has("characters")) {
-        setSelectedCharacters(searchParams.get("characters")!.split("+"));
-      }
-    })();
-  }, []);
-
-  useKeyPressEvent(
-    "Meta",
-    () => {
-      setMode("tag");
-    },
-    () => {
-      setMode(originalMode);
+  const associatedTags = useMemo(() => {
+    if (
+      selectedTweetIds.length === 0 ||
+      !selectedTweetIds.every((id) => id in tweetToTags)
+    ) {
+      return [];
     }
-  );
+    return allTags.filter((tag) =>
+      selectedTweetIds.every((id) => tweetToTags[id].includes(tag))
+    );
+  }, [allTags, selectedTweetIds, tweetToTags]);
 
-  const switchMode = (mode: Mode) => {
-    setMode(mode);
-    setOriginalMode(mode);
+  const updateParams = ({
+    newFilterMethod,
+    newTags,
+  }: {
+    newFilterMethod?: string;
+    newTags?: string[];
+  }) => {
+    const tempTags = newTags || selectedTags;
+    const params: { filterMethod: string; tags?: string } = {
+      filterMethod: newFilterMethod || filterMethod,
+    };
+    if (tempTags.length > 0) {
+      params.tags = tempTags.join("+");
+    }
+    setSearchParams(params);
   };
 
-  const switchPerson = (id: string) => {
-    const characters = selectedCharacters.includes(id)
-      ? selectedCharacters.filter((item) => item !== id)
-      : [...selectedCharacters, id];
-    const trimedCharacters = characters.filter((item) => item.length > 0);
-    setSelectedCharacters(trimedCharacters);
-    setSearchParams({ filterType, characters: trimedCharacters.join("+") });
+  const switchSelect = (id: string) => {
+    const tags = selectedTags.includes(id)
+      ? selectedTags.filter((tag) => tag !== id)
+      : [...selectedTags, id];
+    const filteredTags = tags.filter((tag) => tag.length > 0);
+    setSelectedTags(filteredTags);
+    updateParams({ newTags: filteredTags });
+  };
+
+  const switchFilterMethod = (method: FilterMethod) => {
+    setFilterMethod(method);
+    updateParams({ newFilterMethod: method });
+  };
+
+  const switchAssociation = (tag: string) => {
+    const alreadyExsits = associatedTags.includes(tag);
+
+    // update the data
+    if (alreadyExsits) {
+      deleteTweetTag(selectedTweetIds, [tag]);
+    } else {
+      addTweetTag(selectedTweetIds, [tag]);
+    }
+
+    // display
+    const newTweetToTags: TweetToTag = {
+      ...selectedTweetIds.reduce(
+        (previous, id) => ({ ...previous, [id]: [] }),
+        {}
+      ),
+      ...tweetToTags,
+    };
+    for (const id of selectedTweetIds) {
+      newTweetToTags[id] = alreadyExsits
+        ? newTweetToTags[id].filter((inTag) => inTag !== tag)
+        : [...newTweetToTags[id], tag];
+    }
+    setTweetToTags(newTweetToTags);
   };
 
   const clear = () => {
-    setSelectedCharacters([]);
+    setSelectedTags([]);
     setSearchParams({});
   };
 
@@ -197,30 +219,17 @@ const SideNav = ({
         </div>
         <div>
           <Header>
-            <HeaderTypeList>
-              <HeaderType
-                selected={mode === "filter"}
-                onClick={() => switchMode("filter")}
-              >
-                絞り込み
-              </HeaderType>
-              <HeaderType
-                selected={mode === "tag"}
-                onClick={() => switchMode("tag")}
-              >
-                タグ付け
-              </HeaderType>
-            </HeaderTypeList>
+            <H3>絞り込み</H3>
             <FilterTypeList>
               <FilterType
-                selected={filterType === "and"}
-                onClick={() => setFilterType("and")}
+                selected={filterMethod === "and"}
+                onClick={() => switchFilterMethod("and")}
               >
                 AND
               </FilterType>
               <FilterType
-                selected={filterType === "or"}
-                onClick={() => setFilterType("or")}
+                selected={filterMethod === "or"}
+                onClick={() => switchFilterMethod("or")}
               >
                 OR
               </FilterType>
@@ -232,17 +241,18 @@ const SideNav = ({
             {works.map((work) => (
               <li key={work.title}>
                 <WorkItem>{work.title}</WorkItem>
-                <TagList mode={mode}>
+                <TagList>
                   {work.characters.map((character) => {
-                    const id = getCharacterId(work, character);
+                    const tag = getCharacterTag(work, character);
                     return (
                       <Tag
-                        hue={tagHues[id]}
-                        selected={selectedCharacters.includes(id)}
-                        onClick={() => switchPerson(id)}
+                        selected={selectedTags.includes(tag)}
+                        tweetAssociated={associatedTags.includes(tag)}
+                        hue={tagHues[tag]}
                         label={character}
-                        mode={mode}
-                        key={id}
+                        onClickBody={() => switchSelect(tag)}
+                        onClickPlus={() => switchAssociation(tag)}
+                        key={tag}
                       />
                     );
                   })}
@@ -252,9 +262,15 @@ const SideNav = ({
           </WorkList>
         </div>
         <div>
-          <TagList mode={mode}>
+          <TagList>
             {commonTags.map((tag) => (
-              <Tag hue={0} selected={false} label={tag} mode={mode} key={tag} />
+              <Tag
+                selected={false}
+                tweetAssociated={false}
+                hue={0}
+                label={tag}
+                key={tag}
+              />
             ))}
           </TagList>
         </div>

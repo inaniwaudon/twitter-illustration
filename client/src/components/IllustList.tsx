@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import { defaultBoxShadow } from "@/const/styles";
-import { Tweet } from "@/const/types";
-import { getImageEndpoint } from "@/utils/api";
+import { defaultBoxShadow, getKeyColor } from "@/const/styles";
+import { getImageEndpoint, Tweet, TweetToTag } from "@/utils/api";
+import { FilterMethod } from "@/utils/utils";
 
 const Wrapper = styled.div`
-  height: calc(100vh - 40px);
+  min-height: calc(100vh - 40px);
   padding: 20px 0;
   display: flex;
   gap: 10px;
@@ -13,20 +13,20 @@ const Wrapper = styled.div`
   align-items: flex-start;
 `;
 
-const Row = styled.div<{ rowCount: number }>`
-  flex-basis: ${(props) => 100 / props.rowCount}%;
+const Column = styled.div<{ columnCount: number }>`
+  flex-basis: ${(props) => 100 / props.columnCount}%;
   display: flex;
   flex-direction: column;
   gap: 10px;
 `;
 
-const Illust = styled.div<{ height: number; selected: boolean }>`
-  height: auto;
+const Illust = styled.div<{ aspectRatio: number; selected: boolean }>`
+  aspect-ratio: 1 / ${(props) => props.aspectRatio};
   flex-shrink: 0;
   flex-grow: 0;
   border-radius: 2px;
   box-shadow: ${(props) =>
-    props.selected ? "0 1px 10px rgba(0, 0, 0, 0.2)" : defaultBoxShadow};
+    props.selected ? `0 1px 10px ${getKeyColor(0.3)}` : defaultBoxShadow};
   overflow: hidden;
   transform: scale(${(props) => (props.selected ? 0.9 : 1.0)});
   overflow: hidden;
@@ -35,7 +35,7 @@ const Illust = styled.div<{ height: number; selected: boolean }>`
   &:hover {
     box-shadow: ${(props) =>
       props.selected
-        ? "0 1px 12px rgba(0, 0, 0, 0.2)"
+        ? `0 1px 12px ${getKeyColor(0.3)})`
         : "0 1px 4px rgba(0, 0, 0, 0.2)"};
     transform: scale(${(props) => (props.selected ? 0.89 : 0.98)});
   }
@@ -48,24 +48,32 @@ const Image = styled.img`
 
 interface IllustListProps {
   originalTweets: Tweet[];
-  selectedTweetIds: string[];
-  selectedCharacters: string[];
+  tweetToTags: TweetToTag;
   keyword: string;
-  rowCount: number;
+  columnCount: number;
+  filterMethod: FilterMethod;
+  selectedTweetIds: string[];
+  selectedTags: string[];
   setSelectedTweetIds: (value: string[]) => void;
 }
 
 const IllustList = ({
   originalTweets,
-  selectedTweetIds,
-  selectedCharacters,
+  tweetToTags,
   keyword,
-  rowCount,
+  columnCount,
+  filterMethod,
+  selectedTweetIds,
+  selectedTags,
   setSelectedTweetIds,
 }: IllustListProps) => {
   const [filteredTweets, setFilteredTweets] = useState<Tweet[]>([]);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  const matchesTweet = (tweet: Tweet, tag: string) =>
+    tweet.id in tweetToTags && tweetToTags[tweet.id].includes(tag);
+
+  // filter
   useEffect(() => {
     (async () => {
       const keywordFilteredTweets =
@@ -76,23 +84,40 @@ const IllustList = ({
               )
             : originalTweets.filter((tweet) => tweet.body.includes(keyword))
           : originalTweets;
-      /*const filteredTweets = originalTweets.filter((tweet) =>
-        selectedCharacters.some((selectedCharacter) =>
-          tweet.characters
-            .map((tweetCharacter) => tweet.work + "/" + tweetCharacter)
-            .includes(selectedCharacter)
-        )
-      );*/
-      setFilteredTweets(keywordFilteredTweets);
+      const filteredTweets =
+        selectedTags.length > 0
+          ? originalTweets.filter((tweet) =>
+              filterMethod === "and"
+                ? selectedTags.every((tag) => matchesTweet(tweet, tag))
+                : selectedTags.some((tag) => matchesTweet(tweet, tag))
+            )
+          : keywordFilteredTweets;
+      setFilteredTweets(filteredTweets);
     })();
-  }, [originalTweets, selectedCharacters, keyword]);
+  }, [originalTweets, selectedTags, keyword, tweetToTags, filterMethod]);
 
   const tweetRows = useMemo(() => {
-    // TODO: height
-    return [...Array(rowCount)].map((_, i) =>
-      filteredTweets.filter((_, j) => j % rowCount === i)
-    );
-  }, [filteredTweets, rowCount]);
+    // TODO: when no image exists.
+    const totalHeight = filteredTweets
+      .map((tweet) => tweet.Images[0].height / tweet.Images[0].width)
+      .reduce((previous, current) => previous + current, 0);
+
+    let tweetsPerColumn: Tweet[][] = [[]];
+    let columnHeight = 0;
+
+    for (const tweet of filteredTweets) {
+      tweetsPerColumn.at(-1)!.push(tweet);
+      columnHeight += tweet.Images[0].height / tweet.Images[0].width;
+      if (
+        columnHeight > totalHeight / columnCount &&
+        tweetsPerColumn.length < columnCount
+      ) {
+        tweetsPerColumn.push([]);
+        columnHeight = 0;
+      }
+    }
+    return tweetsPerColumn;
+  }, [filteredTweets, columnCount]);
 
   const onClickTweet = (e: React.MouseEvent, id: string) => {
     setSelectedTweetIds(
@@ -109,10 +134,10 @@ const IllustList = ({
   return (
     <Wrapper ref={wrapperRef}>
       {tweetRows.map((row, i) => (
-        <Row rowCount={rowCount} key={i}>
+        <Column columnCount={columnCount} key={i}>
           {row.map((tweet) => (
             <Illust
-              height={200}
+              aspectRatio={tweet.Images[0].height / tweet.Images[0].width}
               selected={selectedTweetIds.includes(tweet.id)}
               onClick={(e) => onClickTweet(e, tweet.id)}
               key={tweet.id}
@@ -120,7 +145,7 @@ const IllustList = ({
               <Image src={getImageEndpoint(tweet.id, 0)} alt="" />
             </Illust>
           ))}
-        </Row>
+        </Column>
       ))}
     </Wrapper>
   );

@@ -1,4 +1,5 @@
 import express from "express";
+import { Op } from "sequelize";
 import { Error404, Error500 } from "../error";
 import { addTweet } from "../tweet";
 import db from "../../models/index";
@@ -9,7 +10,7 @@ const router = express.Router();
 const tweetEndpoint = "/tweet";
 const tweetTagEndpoint = "/tweet-tag";
 
-// tweet
+// request
 interface TweetGetRequest extends express.Request {
   query: {
     details?: string;
@@ -19,6 +20,13 @@ interface TweetGetRequest extends express.Request {
 interface TweetPostRequest extends express.Request {
   body: {
     id: string;
+  };
+}
+
+interface TweetTagPostOrDeleteRequest extends express.Request {
+  body: {
+    tweetIds: string[];
+    tags: string[];
   };
 }
 
@@ -68,14 +76,63 @@ router.post(
       }
       res.status(500).send("Server error.");
     }
-    res.status(204).send("Created.");
+    res.status(204).send();
   }
 );
 
+router.delete(
+  tweetEndpoint,
+  async (req: express.Request, res: express.Response) => {}
+);
+
 // tweet-tag
+router.get(
+  tweetTagEndpoint,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      res.json(
+        await db.tweetTag.findAll({
+          attributes: ["tweetId", "tag"],
+        })
+      );
+    } catch {
+      res.status(500).send("Server error.");
+    }
+  }
+);
+
 router.post(
   tweetTagEndpoint,
-  (req: express.Request, res: express.Response) => {}
+  async (req: TweetTagPostOrDeleteRequest, res: express.Response) => {
+    try {
+      const records = req.body.tweetIds.flatMap((id) =>
+        req.body.tags.map((tag) => ({ tweetId: id, tag }))
+      );
+      await db.tweetTag.bulkCreate(records, { ignoreDuplicates: true });
+      res.status(204).send();
+    } catch {
+      res.status(500).send("Server error.");
+    }
+  }
+);
+
+router.delete(
+  tweetTagEndpoint,
+  async (req: TweetTagPostOrDeleteRequest, res: express.Response) => {
+    try {
+      const conditions = req.body.tweetIds.flatMap((id) =>
+        req.body.tags.map((tag) => ({ tweetId: id, tag }))
+      );
+      await db.tweetTag.destroy({
+        where: {
+          [Op.or]: conditions,
+        },
+      });
+      res.status(204).send();
+    } catch {
+      res.status(500).send("Server error.");
+    }
+  }
 );
 
 export default router;

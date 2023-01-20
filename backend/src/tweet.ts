@@ -45,7 +45,7 @@ export const addTweet = async (id: string) => {
   });
 
   // upload images
-  const image_objs: {
+  const image_records: {
     tweetId: string;
     index: number;
     width: number;
@@ -58,14 +58,14 @@ export const addTweet = async (id: string) => {
     const buffer = Buffer.from(arrayBuffer);
     fs.writeFileSync(`./images/${tweet.data.id}_${i}.jpeg`, buffer);
 
-    image_objs.push({
+    image_records.push({
       tweetId: tweet.data.id,
       index: i,
       width: images[i].width,
       height: images[i].height,
     });
   }
-  db.image.bulkCreate(image_objs, {
+  db.image.bulkCreate(image_records, {
     ignoreDuplicates: true,
   });
 };
