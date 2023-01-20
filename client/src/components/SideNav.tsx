@@ -31,12 +31,11 @@ const Header = styled.header`
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
 `;
 
 const HeaderTypeList = styled.ul`
   list-style: none;
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
   padding: 0;
   display: flex;
   gap: 10px;
@@ -63,7 +62,7 @@ const HeaderType = styled.li<{ selected: boolean }>`
 
 const FilterTypeList = styled.ul`
   list-style: none;
-  margin: 0;
+  margin: 0 0 4px 0;
   padding: 0;
   border: solid 1px #666;
   border-radius: 4px;
@@ -77,6 +76,10 @@ const FilterType = styled.li<{ selected: boolean }>`
   flex-basis: 50%;
   cursor: pointer;
   background: ${(props) => (props.selected ? linkColor : "transparent")};
+
+  &:hover {
+    background: ${(props) => (props.selected ? linkColor : "#eee")};
+  }
 `;
 
 const Option = styled.a`

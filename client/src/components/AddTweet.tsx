@@ -21,6 +21,7 @@ const Plus = styled.div`
   text-align: center;
   border-radius: 50%;
   background: #069;
+  cursor: pointer;
   box-shadow: ${defaultBoxShadow};
   z-index: 1;
 `;
@@ -63,6 +64,7 @@ const Button = styled.input`
   padding: 0 10px;
   border: none;
   border-radius: 4px;
+  box-shadow: ${defaultBoxShadow};
   background: #069;
 `;
 

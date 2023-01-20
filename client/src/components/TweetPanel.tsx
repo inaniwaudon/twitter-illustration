@@ -78,6 +78,12 @@ const TweetPanel = ({
     ? `https://twitter.com/${selectedTweet["User.screenName"]}/status/${selectedTweet.id}`
     : "";
 
+  const updateRowCount = (value: string) => {
+    setRowCount(
+      Number.isNaN(parseInt(value)) ? 1 : Math.max(parseInt(value), 1)
+    );
+  };
+
   return (
     <Wrapper>
       {selectedTweet ? (
@@ -108,7 +114,7 @@ const TweetPanel = ({
           <input
             type="number"
             value={rowCount}
-            onChange={(e) => setRowCount(parseInt(e.target.value))}
+            onChange={(e) => updateRowCount(e.target.value)}
           />
           <Readme />
         </>

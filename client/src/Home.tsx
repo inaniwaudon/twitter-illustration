@@ -13,7 +13,7 @@ const mainLeft = 220;
 
 const Page = styled.div`
   color: #333;
-  background: #f9f9f9;
+  background: #fcfcfc;
 `;
 
 const SideNavWrapper = styled.div`

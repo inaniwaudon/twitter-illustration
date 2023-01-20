@@ -1,7 +1,7 @@
 export default {
   async up(queryInterface, Sequelize) {
     return await queryInterface.createTable(
-      "TweetCharacters",
+      "TweetTags",
       {
         id: {
           allowNull: false,
@@ -11,10 +11,10 @@ export default {
         },
         tweetId: {
           allowNull: false,
-          references: { model: "Tweets", key: "id" },
+          references: { models: "Tweets", key: "id" },
           type: Sequelize.STRING,
         },
-        character: {
+        tag: {
           allowNull: false,
           type: Sequelize.STRING,
         },
@@ -29,14 +29,14 @@ export default {
       },
       {
         uniqueKeys: {
-          tweetCharacterKey: {
-            fields: ["tweetId", "character"],
+          tweetTagKey: {
+            fields: ["tweetId", "tag"],
           },
         },
       }
     );
   },
   async down(queryInterface, Sequelize) {
-    return await queryInterface.dropTable("TweetCharacters");
+    return await queryInterface.dropTable("TweetTags");
   },
 };

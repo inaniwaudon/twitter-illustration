@@ -19,11 +19,18 @@ export default {
         references: { model: "Users", key: "id" },
         type: Sequelize.STRING,
       },
+      tweetCreatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,
       },
-      work: { type: Sequelize.STRING },
+      updatedAt: {
+        allowNull: false,
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
