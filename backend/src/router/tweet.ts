@@ -49,6 +49,7 @@ router.get(
               order: ["index", "ASC"],
             },
           ],
+          where: {},
         })
       );
     } else {
@@ -70,11 +71,14 @@ router.post(
     } catch (e) {
       if (e instanceof Error404) {
         res.status(404).send(e.message);
+        return;
       }
       if (e instanceof Error500) {
         res.status(500).send(e.message);
+        return;
       }
       res.status(500).send("Server error.");
+      return;
     }
     res.status(204).send();
   }

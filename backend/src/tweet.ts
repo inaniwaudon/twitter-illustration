@@ -18,16 +18,28 @@ export const addTweet = async (id: string) => {
       "user.fields": ["id", "name", "username"],
     });
   } catch (e) {
+    throw new Error500("API error.");
+  }
+  if ("errors" in tweet) {
     throw new Error404("Cannot get a tweet.");
   }
-  if (tweet.includes.users === 0) {
+  if (!("includes" in tweet)) {
+    throw new Error500("No data is included");
+  }
+  if (!("users" in tweet.includes)) {
     throw new Error500("No user exists.");
+  }
+  if (!("media" in tweet.includes)) {
+    throw new Error500("No media exists.");
   }
 
   const user = tweet.includes.users[0];
   const images = tweet.includes.media.filter(
     (medium) => medium.type === "photo"
   );
+  if (images.length === 0) {
+    throw new Error500("No image exists.");
+  }
 
   // insert or update a user
   db.user.upsert({
