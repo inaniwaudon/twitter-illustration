@@ -9,16 +9,28 @@ const Input = styled.input`
   border: none;
   box-shadow: ${defaultBoxShadow};
   box-sizing: content-box;
+  appearance: none;
 `;
 
 interface KeywordInputProps {
   type: "text" | "search";
   value: string;
+  placeholder?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const KeywordInput = ({ type, value, onChange }: KeywordInputProps) => (
-  <Input type={type} value={value} onChange={onChange} />
+const KeywordInput = ({
+  type,
+  value,
+  placeholder,
+  onChange,
+}: KeywordInputProps) => (
+  <Input
+    type={type}
+    value={value}
+    placeholder={placeholder}
+    onChange={onChange}
+  />
 );
 
 export default KeywordInput;

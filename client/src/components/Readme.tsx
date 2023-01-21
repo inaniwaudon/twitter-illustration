@@ -1,50 +1,71 @@
 import React from "react";
 import styled from "styled-components";
+import { HiOutlinePlus } from "react-icons/hi";
+import { IoPricetag } from "react-icons/io5";
+import { getKeyColor } from "@/const/styles";
 
 const H2 = styled.h2`
-  font-size: 16px;
-  padding-bottom: 4px;
+  font-size: 14px;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  padding-bottom: 2px;
   border-bottom: solid 1px #eee;
 `;
 
 const H3 = styled.h3`
-  font-size: 14px;
+  font-size: 12px;
+  margin: 0;
 `;
 
 const Paragpraph = styled.p`
-  font-size: 14px;
+  font-size: 12px;
+  margin: 0;
+
+  + ${H3} {
+    margin-top: 4px;
+  }
 `;
 
-const Button = styled.span`
-  line-height: 1.8;
-  color: #666;
+const PlusButton = styled.span`
+  width: 12px;
+  height: 12px;
+  line-height: 12px;
+  color: #fff;
+  text-align: center;
   margin: 0 4px;
-  padding: 2px;
-  border: solid 1px #ccc;
-  border-radius: 2px;
+  padding: 3px;
+  border-radius: 50%;
+  background: ${getKeyColor(1.0)};
+  display: inline-block;
 `;
 
 const Readme = () => (
   <>
-    <H2>ツイートを追加する</H2>
+    <H2>ツイートの追加</H2>
+    <H3>アプリケーションから</H3>
     <Paragpraph>
-      ツイートを追加するには、右下の<Button>+</Button>ボタンを押してツイートの
-      URL を入力するか、
+      右下の
+      <PlusButton>
+        <HiOutlinePlus />
+      </PlusButton>
+      を押してツイートの URL を入力します。
     </Paragpraph>
-    <H3>拡張機能</H3>
-    <Paragpraph>Google Chrome の拡張機能を利用します。</Paragpraph>
-    <H2>ツイートを絞り込む</H2>
-    <H3>キーワードで検索</H3>
-    <Paragpraph>@ から始まるとスクリーンネームで検索</Paragpraph>
-    <H2>ツイートを選択する</H2>
+    <H3>拡張機能から</H3>
     <Paragpraph>
-      Shift キーを押すと複数のツイートを一度に選択できます。
+      Chrome 拡張を導入して、ツイートのページに表示される +
+      アイコンをクリックします
+    </Paragpraph>
+    <H2>絞り込み</H2>
+    <H3>タグ</H3>
+    <Paragpraph>複数個のタグを選択して絞り込みます。</Paragpraph>
+    <H3>キーワード</H3>
+    <Paragpraph>
+      @ から始めるとスクリーンネームを前方一致で検索します。
     </Paragpraph>
     <H2>タグを編集する</H2>
     <Paragpraph>
-      左側のサイドパネルの<Button>タグ付け</Button>
-      をクリックするか、Ctrl（Command）キーを押すとタグ編集モードに移行します。
-      左側のサイドパネルに表示されているタグを選択することで、現在選択されているツイートにタグを付与します。
+      ツイートを選択した状態で、左側のサイドパネルの <IoPricetag />{" "}
+      をクリックします。
     </Paragpraph>
   </>
 );

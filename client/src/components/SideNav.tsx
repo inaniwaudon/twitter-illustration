@@ -5,12 +5,16 @@ import KeywordInput from "./KeywordInput";
 import Tag from "./Tag";
 import { linkColor } from "@/const/styles";
 import { addTweetTag, deleteTweetTag, TweetToTag, Work } from "@/utils/api";
-import { getCharacterTag, FilterMethod, getAllTags } from "@/utils/utils";
+import {
+  getCharacterTag,
+  FilterMethod,
+  getAllTags,
+  splitCharacterTag,
+} from "@/utils/utils";
 
 const Wrapper = styled.nav`
   height: 100vh;
   padding: 0 20px;
-  overflow-x: hidden;
   overflow-y: scroll;
 `;
 
@@ -30,6 +34,7 @@ const Header = styled.header`
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
+  gap: 2px;
 `;
 
 const H3 = styled.h3`
@@ -37,12 +42,12 @@ const H3 = styled.h3`
   color: "#333";
   font-size: 16px;
   font-weight: bold;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
 `;
 
 const FilterTypeList = styled.ul`
   list-style: none;
-  margin: 0 0 4px 0;
+  margin: 0 0 2px 0;
   padding: 0;
   border: solid 1px #666;
   border-radius: 4px;
@@ -86,6 +91,11 @@ const WorkList = styled.ul`
 const WorkItem = styled.div`
   line-height: 18px;
   font-weight: bold;
+  cursor: pointer;
+
+  &:hover {
+    color: #666;
+  }
 `;
 
 const TagList = styled.ul`
@@ -107,10 +117,12 @@ interface SideNavProps {
   selectedTags: string[];
   keyword: string;
   filterMethod: FilterMethod;
+  onlyUnrelated: boolean;
   setTweetToTags: (value: TweetToTag) => void;
   setSelectedTags: (value: string[]) => void;
   setKeyword: (value: string) => void;
   setFilterMethod: (value: FilterMethod) => void;
+  setOnlyUnrelated: (value: boolean) => void;
 }
 
 const SideNav = ({
@@ -122,10 +134,12 @@ const SideNav = ({
   selectedTags,
   keyword,
   filterMethod,
+  onlyUnrelated,
   setTweetToTags,
   setSelectedTags,
   setKeyword,
   setFilterMethod,
+  setOnlyUnrelated,
 }: SideNavProps) => {
   const [_, setSearchParams] = useSearchParams();
   const allTags = getAllTags(works, commonTags);
@@ -166,6 +180,20 @@ const SideNav = ({
     const filteredTags = tags.filter((tag) => tag.length > 0);
     setSelectedTags(filteredTags);
     updateParams({ newTags: filteredTags });
+  };
+
+  const switchSelectWork = (work: string) => {
+    const targetWork = works.find((inWork) => inWork.title === work);
+    if (targetWork) {
+      const tags = targetWork.characters.map((character) =>
+        getCharacterTag(targetWork, character)
+      );
+      const newTags = tags.every((tag) => selectedTags.includes(tag))
+        ? selectedTags.filter((tag) => splitCharacterTag(tag).work !== work)
+        : Array.from(new Set([...selectedTags, ...tags]));
+      setSelectedTags(newTags);
+      updateParams({ newTags });
+    }
   };
 
   const switchFilterMethod = (method: FilterMethod) => {
@@ -213,6 +241,7 @@ const SideNav = ({
             <KeywordInput
               type="search"
               value={keyword}
+              placeholder="ツイート本文から検索"
               onChange={(e) => setKeyword(e.target.value)}
             />
           </label>
@@ -235,12 +264,16 @@ const SideNav = ({
               </FilterType>
             </FilterTypeList>
             <Option onClick={clear}>絞り込みを解除</Option>
-            <Option>タグ未設定のみ表示</Option>
+            <Option onClick={() => setOnlyUnrelated(!onlyUnrelated)}>
+              {onlyUnrelated ? "元に戻す" : "タグ未設定のみ表示"}
+            </Option>
           </Header>
           <WorkList>
             {works.map((work) => (
               <li key={work.title}>
-                <WorkItem>{work.title}</WorkItem>
+                <WorkItem onClick={() => switchSelectWork(work.title)}>
+                  {work.title}
+                </WorkItem>
                 <TagList>
                   {work.characters.map((character) => {
                     const tag = getCharacterTag(work, character);

@@ -18,6 +18,7 @@ import {
 import { getCharacterTag, FilterMethod, getAllTags } from "./utils/utils";
 
 const SideNavWidth = 220;
+const TweetPanelWidth = 300;
 
 const Page = styled.div`
   color: #333;
@@ -29,18 +30,35 @@ const SideNavWrapper = styled.div`
   position: fixed;
   top: 0;
   left: 0;
+
+  @media screen and (max-width: 600px) {
+    display: none;
+  }
 `;
 
 const Main = styled.main`
+  padding: 0 20px 0 0;
   margin-left: ${SideNavWidth}px;
-  margin-right: 320px;
+  margin-right: ${TweetPanelWidth}px;
+
+  @media screen and (max-width: 600px) {
+    margin-left: 20px;
+  }
+
+  @media screen and (max-width: 900px) {
+    margin-right: 0;
+  }
 `;
 
 const TweetWrapper = styled.div`
-  width: 300px;
+  width: ${TweetPanelWidth}px;
   position: fixed;
   top: 0;
   right: 0;
+
+  @media screen and (max-width: 900px) {
+    display: none;
+  }
 `;
 
 const StatusWrapper = styled.div`
@@ -73,6 +91,7 @@ const Home = () => {
   // filter
   const [filterMethod, setFilterMethod] = useState<FilterMethod>("or");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [onlyUnrelated, setOnlyUnrelated] = useState<boolean>(false);
 
   useEffect(() => {
     (async () => {
@@ -129,10 +148,12 @@ const Home = () => {
           selectedTags={selectedTags}
           keyword={keyword}
           filterMethod={filterMethod}
+          onlyUnrelated={onlyUnrelated}
           setTweetToTags={setTweetToTags}
           setSelectedTags={setSelectedTags}
           setKeyword={setKeyword}
           setFilterMethod={setFilterMethod}
+          setOnlyUnrelated={setOnlyUnrelated}
         />
       </SideNavWrapper>
       <Main>
@@ -144,6 +165,7 @@ const Home = () => {
           filterMethod={filterMethod}
           selectedTweetIds={selectedTweetIds}
           selectedTags={selectedTags}
+          onlyUnrelated={onlyUnrelated}
           setSelectedTweetIds={setSelectedTweetIds}
         />
       </Main>
@@ -156,7 +178,7 @@ const Home = () => {
         />
       </TweetWrapper>
       <StatusWrapper>
-        <Status />
+        <Status selectedTweetCount={selectedTweetIds.length} />
       </StatusWrapper>
       <AddTweetWrapper>
         <AddTweet />

@@ -8,7 +8,7 @@ export const getCharacterTag = (work: Work, character: string) =>
 export const splitCharacterTag = (
   tag: string
 ): { work: string; character: string } => {
-  const splited = tag.split(tagDelimiter)[0];
+  const splited = tag.split(tagDelimiter);
   return {
     work: splited[0],
     character: splited[1],

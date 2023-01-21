@@ -1,7 +1,8 @@
 import React from "react";
 import styled from "styled-components";
-import TweetDisplay from "./TweetDisplay";
 import Readme from "./Readme";
+import TweetDisplay from "./TweetDisplay";
+import { defaultBoxShadow } from "@/const/styles";
 import { Tweet } from "@/utils/api";
 
 const Wrapper = styled.div`
@@ -10,6 +11,30 @@ const Wrapper = styled.div`
   background: #fff;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
   overflow-y: scroll;
+`;
+
+const Setting = styled.div`
+  margin-bottom: 20px;
+`;
+
+const SettingItem = styled.label`
+  line-height: 26px;
+  display: flex;
+  gap: 4px;
+`;
+
+const SettingLabel = styled.div`
+  width: 40px;
+`;
+
+const Input = styled.input`
+  height: 26px;
+  padding: 0 0 0 8px;
+  border-radius: 4px;
+  border: none;
+  box-shadow: ${defaultBoxShadow};
+  box-sizing: content-box;
+  appearance: none;
 `;
 
 interface TweetProps {
@@ -37,12 +62,16 @@ const TweetPanel = ({
         <TweetDisplay selectedTweet={selectedTweet} setKeyword={setKeyword} />
       ) : (
         <>
-          列数
-          <input
-            type="number"
-            value={columnCount}
-            onChange={(e) => updateRowCount(e.target.value)}
-          />
+          <Setting>
+            <SettingItem>
+              <SettingLabel>列数</SettingLabel>
+              <Input
+                type="number"
+                value={columnCount}
+                onChange={(e) => updateRowCount(e.target.value)}
+              />
+            </SettingItem>
+          </Setting>
           <Readme />
         </>
       )}

@@ -208,6 +208,11 @@ sketch
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,node,react,visualstudiocode
 
+
+# backend
 backend/images
 backend/test
 *.sqlite3
+
+# chrome extension
+!chrome-extension/dist

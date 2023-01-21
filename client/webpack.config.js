@@ -17,7 +17,7 @@ module.exports = () => {
       rules: [
         {
           test: /\.tsx?$/,
-          loader: "ts-loader",
+          loader: "babel-loader",
         },
       ],
     },
@@ -32,6 +32,12 @@ module.exports = () => {
       static: path.join(__dirname, "dist"),
       open: false,
       port: 3000,
+      proxy: {
+        "/api": {
+          target: process.env.BACKEND_URL,
+          pathRewrite: { "^/api": "" },
+        },
+      },
     },
     plugins: [
       new htmlWebpackPlugin({

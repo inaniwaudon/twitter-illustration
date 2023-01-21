@@ -1,0 +1,17 @@
+{
+  "presets": [
+    ["@babel/preset-typescript"],
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "ie": 11,
+          "ios": 14
+        },
+        "corejs": 3,
+        "useBuiltIns": "usage"
+      }
+    ]
+  ],
+  "plugins": ["@babel/plugin-transform-react-jsx"]
+}

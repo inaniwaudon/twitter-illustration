@@ -1,5 +1,5 @@
 import process from "process";
-import { DataTypes, Sequelize } from "sequelize";
+import { Sequelize } from "sequelize";
 import image from "./image";
 import tweet from "./tweet";
 import tweetTag from "./tweet-tag";

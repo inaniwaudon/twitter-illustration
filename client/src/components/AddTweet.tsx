@@ -7,9 +7,9 @@ import { addTweet } from "@/utils/api";
 
 const Wrapper = styled.div`
   display: flex;
-  flex-direction: column-reverse;
-  align-items: end;
-  justify-content: end;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
   gap: 10px;
 `;
 
@@ -65,6 +65,7 @@ const Button = styled.input`
   border: none;
   border-radius: 4px;
   box-shadow: ${defaultBoxShadow};
+  appearance: none;
   background: ${getKeyColor(1.0)};
 `;
 
@@ -99,11 +100,6 @@ const AddTweet = () => {
 
   return (
     <Wrapper>
-      <Plus onClick={switchDisplaysPanel}>
-        <PlusIcon isPlus={!displaysPanel}>
-          <HiOutlinePlus size="20px" />
-        </PlusIcon>
-      </Plus>
       <Panel displays={displaysPanel}>
         <H2>ツイートを追加</H2>
         <Form>
@@ -116,6 +112,11 @@ const AddTweet = () => {
         </Form>
         <Message>{message}</Message>
       </Panel>
+      <Plus onClick={switchDisplaysPanel}>
+        <PlusIcon isPlus={!displaysPanel}>
+          <HiOutlinePlus size="20px" />
+        </PlusIcon>
+      </Plus>
     </Wrapper>
   );
 };

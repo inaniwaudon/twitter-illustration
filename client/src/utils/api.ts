@@ -25,7 +25,7 @@ export interface Tweet {
 export type TweetToTag = { [key in string]: string[] };
 
 const getRequest = (endpoint: string, params: { [key in string]: string }) => {
-  const url = urlJoin(process.env.BACKEND_URL!, endpoint);
+  const url = urlJoin("/api", endpoint);
   const searchParams = new URLSearchParams(params);
   return fetch(`${url}?${searchParams}`);
 };
@@ -35,7 +35,7 @@ const postOrDeleteRequestWithJson = (
   body: unknown,
   method: "POST" | "DELETE"
 ) => {
-  const url = urlJoin(process.env.BACKEND_URL!, endpoint);
+  const url = urlJoin("/api", endpoint);
   return fetch(url, {
     method,
     headers: {
@@ -47,14 +47,12 @@ const postOrDeleteRequestWithJson = (
 
 // tag
 export const getWorks = async () => {
-  const url = urlJoin(process.env.BACKEND_URL!, "work");
-  const response = await fetch(url);
+  const response = await getRequest("work", {});
   return (await response.json()) as Work[];
 };
 
 export const getCommonTags = async () => {
-  const url = urlJoin(process.env.BACKEND_URL!, "common-tag");
-  const response = await fetch(url);
+  const response = await getRequest("common-tag", {});
   return (await response.json()) as string[];
 };
 
@@ -95,5 +93,5 @@ export const deleteTweetTag = async (tweetIds: string[], tags: string[]) => {
 
 // image
 export const getImageEndpoint = (id: string, no: number) => {
-  return urlJoin(process.env.BACKEND_URL!, "image", `?id=${id}`, `&no=${no}`);
+  return urlJoin("/api/image", `?id=${id}`, `&no=${no}`);
 };

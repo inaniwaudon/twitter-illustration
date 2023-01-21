@@ -26,7 +26,7 @@ const Illust = styled.div<{ aspectRatio: number; selected: boolean }>`
   flex-grow: 0;
   border-radius: 2px;
   box-shadow: ${(props) =>
-    props.selected ? `0 1px 10px ${getKeyColor(0.3)}` : defaultBoxShadow};
+    props.selected ? `0 1px 14px ${getKeyColor(0.4)}` : defaultBoxShadow};
   overflow: hidden;
   transform: scale(${(props) => (props.selected ? 0.9 : 1.0)});
   overflow: hidden;
@@ -35,7 +35,7 @@ const Illust = styled.div<{ aspectRatio: number; selected: boolean }>`
   &:hover {
     box-shadow: ${(props) =>
       props.selected
-        ? `0 1px 12px ${getKeyColor(0.3)})`
+        ? `0 1px 16px ${getKeyColor(0.4)})`
         : "0 1px 4px rgba(0, 0, 0, 0.2)"};
     transform: scale(${(props) => (props.selected ? 0.89 : 0.98)});
   }
@@ -54,6 +54,7 @@ interface IllustListProps {
   filterMethod: FilterMethod;
   selectedTweetIds: string[];
   selectedTags: string[];
+  onlyUnrelated: boolean;
   setSelectedTweetIds: (value: string[]) => void;
 }
 
@@ -65,9 +66,11 @@ const IllustList = ({
   filterMethod,
   selectedTweetIds,
   selectedTags,
+  onlyUnrelated,
   setSelectedTweetIds,
 }: IllustListProps) => {
   const [filteredTweets, setFilteredTweets] = useState<Tweet[]>([]);
+  const [onlyUnrelatedTweets, setOnlyUnrelatedTweets] = useState<Tweet[]>();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const matchesTweet = (tweet: Tweet, tag: string) =>
@@ -75,26 +78,45 @@ const IllustList = ({
 
   // filter
   useEffect(() => {
-    (async () => {
-      const keywordFilteredTweets =
-        keyword.length > 0
-          ? keyword.startsWith("@")
-            ? originalTweets.filter((tweet) =>
-                tweet.User.screenName.startsWith(keyword.slice(1))
-              )
-            : originalTweets.filter((tweet) => tweet.body.includes(keyword))
-          : originalTweets;
-      const filteredTweets =
-        selectedTags.length > 0
+    if (onlyUnrelated) {
+      if (!onlyUnrelatedTweets) {
+        const filteredTweets = originalTweets.filter(
+          (tweet) =>
+            !(tweet.id in tweetToTags) || tweetToTags[tweet.id].length === 0
+        );
+        setFilteredTweets(filteredTweets);
+        setOnlyUnrelatedTweets(filteredTweets);
+      }
+      return;
+    }
+
+    const keywordFilteredTweets =
+      keyword.length > 0
+        ? keyword.startsWith("@")
           ? originalTweets.filter((tweet) =>
-              filterMethod === "and"
-                ? selectedTags.every((tag) => matchesTweet(tweet, tag))
-                : selectedTags.some((tag) => matchesTweet(tweet, tag))
+              tweet.User.screenName.startsWith(keyword.slice(1))
             )
-          : keywordFilteredTweets;
-      setFilteredTweets(filteredTweets);
-    })();
-  }, [originalTweets, selectedTags, keyword, tweetToTags, filterMethod]);
+          : originalTweets.filter((tweet) => tweet.body.includes(keyword))
+        : originalTweets;
+    const filteredTweets =
+      selectedTags.length > 0
+        ? keywordFilteredTweets.filter((tweet) =>
+            filterMethod === "and"
+              ? selectedTags.every((tag) => matchesTweet(tweet, tag))
+              : selectedTags.some((tag) => matchesTweet(tweet, tag))
+          )
+        : keywordFilteredTweets;
+    setFilteredTweets(filteredTweets);
+    setOnlyUnrelatedTweets(undefined);
+    setSelectedTweetIds([]);
+  }, [
+    originalTweets,
+    selectedTags,
+    keyword,
+    tweetToTags,
+    filterMethod,
+    onlyUnrelated,
+  ]);
 
   const tweetRows = useMemo(() => {
     // TODO: when no image exists.
@@ -106,7 +128,7 @@ const IllustList = ({
     let columnHeight = 0;
 
     for (const tweet of filteredTweets) {
-      tweetsPerColumn.at(-1)!.push(tweet);
+      tweetsPerColumn[tweetsPerColumn.length - 1]!.push(tweet);
       columnHeight += tweet.Images[0].height / tweet.Images[0].width;
       if (
         columnHeight > totalHeight / columnCount &&
