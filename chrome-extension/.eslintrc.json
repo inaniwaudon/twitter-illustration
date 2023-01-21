@@ -11,5 +11,6 @@
     "sourceType": "module"
   },
   "plugins": ["@typescript-eslint"],
-  "rules": {}
+  "rules": {},
+  "ignores": ["./*.config.js"]
 }

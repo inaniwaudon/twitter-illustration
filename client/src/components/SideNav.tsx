@@ -234,6 +234,7 @@ const SideNav = ({
   };
 
   const clear = () => {
+    setKeyword("");
     setSelectedTags([]);
     setSearchParams({});
   };

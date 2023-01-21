@@ -213,6 +213,3 @@ sketch
 backend/images
 backend/test
 *.sqlite3
-
-# chrome extension
-!chrome-extension/dist
