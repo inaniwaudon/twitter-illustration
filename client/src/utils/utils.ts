@@ -31,3 +31,8 @@ export const deepCopy = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
 
 export type Mode = "filter" | "tag";
 export type FilterMethod = "and" | "or";
+
+export interface DisplayOptions {
+  isSquare: boolean;
+  columns: number;
+}

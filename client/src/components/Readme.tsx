@@ -66,14 +66,14 @@ const Readme = () => (
     </Paragpraph>
     <H2>絞り込み</H2>
     <H3>タグ</H3>
-    <Paragpraph>複数個のタグを選択して絞り込みます。</Paragpraph>
+    <Paragpraph>タグを選択して絞り込みます。</Paragpraph>
     <H3>キーワード</H3>
     <Paragpraph>
       @ から始めるとスクリーンネームを前方一致で検索します。
     </Paragpraph>
     <H2>タグの付与・削除</H2>
     <Paragpraph>
-      ツイートを選択した状態で、左側のサイドパネルの <IoPricetag />{" "}
+      ツイートを選択した状態で、左サイドパネルの <IoPricetag />{" "}
       をクリックします。
     </Paragpraph>
     <H2>タグの編集</H2>

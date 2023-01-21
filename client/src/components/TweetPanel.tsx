@@ -4,9 +4,11 @@ import Readme from "./Readme";
 import TweetDisplay from "./TweetDisplay";
 import { defaultBoxShadow } from "@/const/styles";
 import { Tweet } from "@/utils/api";
+import { DisplayOptions } from "@/utils/utils";
 
 const Wrapper = styled.div`
   height: calc(100vh - 40px);
+  font-size: 14px;
   padding: 20px;
   background: #fff;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
@@ -15,6 +17,9 @@ const Wrapper = styled.div`
 
 const Setting = styled.div`
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 `;
 
 const SettingItem = styled.label`
@@ -39,21 +44,26 @@ const Input = styled.input`
 
 interface TweetProps {
   selectedTweet: Tweet | undefined;
-  columnCount: number;
+  displayOptions: DisplayOptions;
   setKeyword: (value: string) => void;
-  setColumnCount: (value: number) => void;
+  setDisplayOptions: (value: DisplayOptions) => void;
 }
 
 const TweetPanel = ({
   selectedTweet,
-  columnCount,
+  displayOptions,
   setKeyword,
-  setColumnCount,
+  setDisplayOptions,
 }: TweetProps) => {
   const updateRowCount = (value: string) => {
-    setColumnCount(
-      Number.isNaN(parseInt(value)) ? 1 : Math.max(parseInt(value), 1)
-    );
+    setDisplayOptions({
+      ...displayOptions,
+      columns: Number.isNaN(parseInt(value)) ? 1 : Math.max(parseInt(value), 1),
+    });
+  };
+
+  const updateIsSquare = (value: boolean) => {
+    setDisplayOptions({ ...displayOptions, isSquare: value });
   };
 
   return (
@@ -67,9 +77,17 @@ const TweetPanel = ({
               <SettingLabel>列数</SettingLabel>
               <Input
                 type="number"
-                value={columnCount}
+                value={displayOptions.columns}
                 onChange={(e) => updateRowCount(e.target.value)}
               />
+            </SettingItem>
+            <SettingItem>
+              <input
+                type="checkbox"
+                checked={displayOptions.isSquare}
+                onChange={(e) => updateIsSquare(e.target.checked)}
+              />
+              正方形で表示する
             </SettingItem>
           </Setting>
           <Readme />

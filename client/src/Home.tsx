@@ -16,7 +16,12 @@ import {
   TweetToTag,
   Work,
 } from "./utils/api";
-import { getCharacterTag, FilterMethod, getAllTags } from "./utils/utils";
+import {
+  getCharacterTag,
+  getAllTags,
+  DisplayOptions,
+  FilterMethod,
+} from "./utils/utils";
 
 const SideNavWidth = 220;
 const TweetPanelWidth = 300;
@@ -85,8 +90,16 @@ const Home = () => {
   const [originalTweets, setOriginalTweets] = useState<Tweet[]>([]);
   const [selectedTweetIds, setSelectedTweetIds] = useState<string[]>([]);
   const [keyword, setKeyword] = useState<string>("");
-  const [columnCount, setColumnCount] = useState(3);
+  const [displayOptions, _setDisplayOptions] = useState<DisplayOptions>({
+    isSquare: false,
+    columns: 3,
+  });
   const [isShiftKeyPressed, setShiftKeyPressed] = useState(false);
+
+  const setDisplayOptions = (value: DisplayOptions) => {
+    localStorage.setItem("displayOptions", JSON.stringify(value));
+    _setDisplayOptions(value);
+  };
 
   // tag
   const [works, setWorks] = useState<Work[]>([]);
@@ -101,8 +114,27 @@ const Home = () => {
 
   useEffect(() => {
     (async () => {
+      // display options
+      const localDisplayOptions = localStorage.getItem("displayOptions");
+      if (localDisplayOptions) {
+        try {
+          const parsedOptions = JSON.parse(localDisplayOptions);
+          if (
+            parsedOptions instanceof Object &&
+            !Array.isArray(parsedOptions) &&
+            typeof parsedOptions.isSquare === "boolean" &&
+            Number.isInteger(parsedOptions.columns)
+          ) {
+            setDisplayOptions(parsedOptions);
+          }
+        } catch {
+          // ignore
+        }
+      }
+
       // tag
       const works = await getWorks();
+      const tempCommonTags = await getCommonTags();
       const hues: { [key in string]: number } = {};
       let i = 0;
       for (const work of works) {
@@ -111,14 +143,9 @@ const Home = () => {
           i += 20;
         }
       }
-      const tempCommonTags = await getCommonTags();
       setWorks(works);
       setTagHues(hues);
       setCommonTags(tempCommonTags);
-
-      // tweet, tweet-tag
-      setOriginalTweets(await getTweets());
-      setTweetToTags(await getTweetToTags());
 
       // params
       if (searchParams.has("tags")) {
@@ -134,6 +161,10 @@ const Home = () => {
           searchParams.get("filterMethod") === "and" ? "and" : "or"
         );
       }
+
+      // tweet, tweet-tag
+      setOriginalTweets(await getTweets());
+      setTweetToTags(await getTweetToTags());
     })();
   }, []);
 
@@ -168,7 +199,7 @@ const Home = () => {
           originalTweets={originalTweets}
           tweetToTags={tweetToTags}
           keyword={keyword}
-          columnCount={columnCount}
+          displayOptions={displayOptions}
           filterMethod={filterMethod}
           selectedTweetIds={selectedTweetIds}
           selectedTags={selectedTags}
@@ -180,9 +211,9 @@ const Home = () => {
       <TweetWrapper>
         <TweetPanel
           selectedTweet={selectedTweet}
-          columnCount={columnCount}
+          displayOptions={displayOptions}
           setKeyword={setKeyword}
-          setColumnCount={setColumnCount}
+          setDisplayOptions={setDisplayOptions}
         />
       </TweetWrapper>
       <StatusWrapper>
