@@ -1,7 +1,7 @@
 import express from "express";
 import { Op } from "sequelize";
-import { Error404, Error500 } from "../error";
-import { addTweet } from "../tweet";
+import { CustomError } from "../error";
+import { addTweet, getTweetIds } from "../tweet";
 import db from "../../models/index";
 
 const router = express.Router();
@@ -17,9 +17,9 @@ interface TweetGetRequest extends express.Request {
   };
 }
 
-interface TweetPostRequest extends express.Request {
+interface TweetPostOrDeleteRequest extends express.Request {
   body: {
-    id: string;
+    ids: string[];
   };
 }
 
@@ -53,28 +53,27 @@ router.get(
         })
       );
     } else {
-      res.json(
-        await db.tweet.findAll({
-          attributes: ["id"],
-          raw: true,
-        })
-      );
+      try {
+        res.json(await getTweetIds());
+      } catch (e) {
+        if (e instanceof CustomError) {
+          res.status(e.status).send(e.message);
+        } else {
+          res.status(500).send("Server error.");
+        }
+      }
     }
   }
 );
 
 router.post(
   tweetEndpoint,
-  async (req: TweetPostRequest, res: express.Response) => {
+  async (req: TweetPostOrDeleteRequest, res: express.Response) => {
     try {
-      await addTweet(req.body.id);
+      await Promise.all(req.body.ids.map((id) => addTweet(id)));
     } catch (e) {
-      if (e instanceof Error404) {
-        res.status(404).send(e.message);
-        return;
-      }
-      if (e instanceof Error500) {
-        res.status(500).send(e.message);
+      if (e instanceof CustomError) {
+        res.status(e.status).send(e.message);
         return;
       }
       res.status(500).send("Server error.");
@@ -86,7 +85,21 @@ router.post(
 
 router.delete(
   tweetEndpoint,
-  async (req: express.Request, res: express.Response) => {}
+  async (req: TweetPostOrDeleteRequest, res: express.Response) => {
+    try {
+      await db.tweet.destroy({
+        where: {
+          id: {
+            [Op.in]: req.body.ids,
+          },
+        },
+      });
+      res.status(204).send();
+    } catch (e) {
+      console.log(e);
+      res.status(500).send("Server error.");
+    }
+  }
 );
 
 // tweet-tag

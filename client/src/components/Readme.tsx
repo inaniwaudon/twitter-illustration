@@ -6,8 +6,8 @@ import { getKeyColor } from "@/const/styles";
 
 const H2 = styled.h2`
   font-size: 14px;
-  margin-top: 12px;
-  margin-bottom: 6px;
+  margin-top: 20px;
+  margin-bottom: 8px;
   padding-bottom: 2px;
   border-bottom: solid 1px #eee;
 `;
@@ -22,7 +22,13 @@ const Paragpraph = styled.p`
   margin: 0;
 
   + ${H3} {
-    margin-top: 4px;
+    margin-top: 10px;
+  }
+`;
+
+const Wrapper = styled.div`
+  ${Paragpraph} + ${Paragpraph} {
+    margin-top: 8px;
   }
 `;
 
@@ -40,8 +46,11 @@ const PlusButton = styled.span`
 `;
 
 const Readme = () => (
-  <>
+  <Wrapper>
     <H2>ツイートの追加</H2>
+    <Paragpraph>
+      追加したツイートの表示はページリロード後に反映されます。
+    </Paragpraph>
     <H3>アプリケーションから</H3>
     <Paragpraph>
       右下の
@@ -62,12 +71,17 @@ const Readme = () => (
     <Paragpraph>
       @ から始めるとスクリーンネームを前方一致で検索します。
     </Paragpraph>
-    <H2>タグを編集する</H2>
+    <H2>タグの付与・削除</H2>
     <Paragpraph>
       ツイートを選択した状態で、左側のサイドパネルの <IoPricetag />{" "}
       をクリックします。
     </Paragpraph>
-  </>
+    <H2>タグの編集</H2>
+    <Paragpraph>
+      background/data 以下にある JSON ファイル works.json, common-tag.json
+      を編集します。
+    </Paragpraph>
+  </Wrapper>
 );
 
 export default Readme;

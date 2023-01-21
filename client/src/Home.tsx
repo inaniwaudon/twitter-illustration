@@ -6,6 +6,7 @@ import IllustList from "./components/IllustList";
 import SideNav from "./components/SideNav";
 import Status from "./components/Status";
 import TweetPanel from "./components/TweetPanel";
+import { breakpoint0, breakpoint1 } from "./const/styles";
 import {
   getCommonTags,
   getTweets,
@@ -31,7 +32,7 @@ const SideNavWrapper = styled.div`
   top: 0;
   left: 0;
 
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: ${breakpoint1}px) {
     display: none;
   }
 `;
@@ -41,11 +42,11 @@ const Main = styled.main`
   margin-left: ${SideNavWidth}px;
   margin-right: ${TweetPanelWidth}px;
 
-  @media screen and (max-width: 600px) {
+  @media screen and (max-width: ${breakpoint1}px) {
     margin-left: 20px;
   }
 
-  @media screen and (max-width: 900px) {
+  @media screen and (max-width: ${breakpoint0}px) {
     margin-right: 0;
   }
 `;
@@ -56,7 +57,7 @@ const TweetWrapper = styled.div`
   top: 0;
   right: 0;
 
-  @media screen and (max-width: 900px) {
+  @media screen and (max-width: ${breakpoint0}px) {
     display: none;
   }
 `;
@@ -65,6 +66,10 @@ const StatusWrapper = styled.div`
   position: fixed;
   bottom: 20px;
   left: ${SideNavWidth}px;
+
+  @media screen and (max-width: ${breakpoint1}px) {
+    left: 20px;
+  }
 `;
 
 const AddTweetWrapper = styled.div`
@@ -81,6 +86,7 @@ const Home = () => {
   const [selectedTweetIds, setSelectedTweetIds] = useState<string[]>([]);
   const [keyword, setKeyword] = useState<string>("");
   const [columnCount, setColumnCount] = useState(3);
+  const [isShiftKeyPressed, setShiftKeyPressed] = useState(false);
 
   // tag
   const [works, setWorks] = useState<Work[]>([]);
@@ -154,6 +160,7 @@ const Home = () => {
           setKeyword={setKeyword}
           setFilterMethod={setFilterMethod}
           setOnlyUnrelated={setOnlyUnrelated}
+          setSelectedTweetIds={setSelectedTweetIds}
         />
       </SideNavWrapper>
       <Main>
@@ -166,6 +173,7 @@ const Home = () => {
           selectedTweetIds={selectedTweetIds}
           selectedTags={selectedTags}
           onlyUnrelated={onlyUnrelated}
+          isShiftKeyPressed={isShiftKeyPressed}
           setSelectedTweetIds={setSelectedTweetIds}
         />
       </Main>
@@ -178,7 +186,11 @@ const Home = () => {
         />
       </TweetWrapper>
       <StatusWrapper>
-        <Status selectedTweetCount={selectedTweetIds.length} />
+        <Status
+          selectedTweetIds={selectedTweetIds}
+          isShiftKeyPressed={isShiftKeyPressed}
+          setShiftKeyPressed={setShiftKeyPressed}
+        />
       </StatusWrapper>
       <AddTweetWrapper>
         <AddTweet />

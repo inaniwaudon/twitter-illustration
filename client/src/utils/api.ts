@@ -63,7 +63,11 @@ export const getTweets = async () => {
 };
 
 export const addTweet = async (id: string) => {
-  return await postOrDeleteRequestWithJson("tweet", { id }, "POST");
+  return await postOrDeleteRequestWithJson("tweet", { ids: [id] }, "POST");
+};
+
+export const deleteTweets = async (ids: string[]) => {
+  return await postOrDeleteRequestWithJson("tweet", { ids }, "DELETE");
 };
 
 // tweet-tag

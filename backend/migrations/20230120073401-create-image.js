@@ -12,6 +12,7 @@ export default {
         tweetId: {
           allowNull: false,
           references: { model: "Tweets", key: "id" },
+          onDelete: "CASCADE",
           type: Sequelize.STRING,
         },
         index: {

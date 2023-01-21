@@ -11,11 +11,16 @@ interface ImageRequest extends express.Request {
 }
 
 router.get("/image", (req: ImageRequest, res: express.Response) => {
-  const filepath = path.join(
-    __dirname,
-    `../../images/${req.query.id}_${req.query.no}.jpeg`
-  );
-  res.sendFile(filepath);
+  try {
+    const filepath = path.join(
+      __dirname,
+      `../../images/${req.query.id}_${req.query.no}.jpeg`
+    );
+    res.sendFile(filepath);
+  } catch (e) {
+    console.log(e);
+    res.status(500).send("IO error.");
+  }
 });
 
 export default router;

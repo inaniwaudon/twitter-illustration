@@ -41,7 +41,7 @@ const Panel = styled.div<{ displays: boolean }>`
   border-radius: 4px;
   box-shadow: ${defaultBoxShadow};
   opacity: ${(props) => (props.displays ? 1.0 : 0)};
-  pointer-events: ${(props) => (props.displays ? "auto" : "none")};
+  visibility: ${(props) => (props.displays ? "visible" : "hidden")};
   background: rgba(255, 255, 255, 0.9);
   transition: opacity 0.2s;
 `;
@@ -69,9 +69,8 @@ const Button = styled.input`
   background: ${getKeyColor(1.0)};
 `;
 
-const Message = styled.p`
-  color: #666;
-  height: 12px;
+const Message = styled.p<{ isError: boolean }>`
+  color: ${(props) => (props.isError ? "#c00" : "#666")};
   line-height: 12px;
   font-size: 12px;
   margin: 10px 0 0 0;
@@ -82,6 +81,7 @@ const AddTweet = () => {
   const [message, setMessage] = useState(
     "https://twitter.com/... の形式で URL を入力"
   );
+  const [isMessageError, setMessageError] = useState(false);
   const [displaysPanel, setDisplaysPanel] = useState(false);
 
   const switchDisplaysPanel = () => {
@@ -91,11 +91,20 @@ const AddTweet = () => {
   const submit = async () => {
     if (!/^https:\/\/twitter.com\/.+\/status\/[0-9]+$/.test(url)) {
       setMessage("https://twitter.com/... の形式で指定してください");
+      setMessageError(true);
       return;
     }
     const response = await addTweet(url.split("/").at(-1)!);
-    setMessage(response.status === 204 ? "記録しました" : "記録に失敗しました");
-    setUrl("");
+    if (response.ok) {
+      setMessage("記録しました");
+      setMessageError(false);
+      setUrl("");
+    } else {
+      setMessage(
+        `処理に失敗しました。${response.status} ${await response.text()}`
+      );
+      setMessageError(true);
+    }
   };
 
   return (
@@ -110,7 +119,7 @@ const AddTweet = () => {
           />
           <Button type="button" value="追加" onClick={() => submit()} />
         </Form>
-        <Message>{message}</Message>
+        <Message isError={isMessageError}>{message}</Message>
       </Panel>
       <Plus onClick={switchDisplaysPanel}>
         <PlusIcon isPlus={!displaysPanel}>

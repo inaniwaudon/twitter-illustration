@@ -21,45 +21,45 @@ var __webpack_exports__ = {};
   !*** ./src/background.ts ***!
   \***************************/
 __webpack_require__.r(__webpack_exports__);
-const BACKEND_URL = "http://localhost:3030";
+const BACKEND_URL = 'http://localhost:3030';
 const generateErrorMessage = (type) => ({
     succeeded: false,
-    message: type === "serverError"
-        ? "Server error."
-        : type === "networkError"
-            ? "Network error."
-            : "Invalid message.",
+    message: type === 'serverError'
+        ? 'Server error.'
+        : type === 'networkError'
+            ? 'Network error.'
+            : 'Invalid message.',
 });
 chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
-    if (message && message instanceof Object && "type" in message) {
+    if (message && message instanceof Object && 'type' in message) {
         // add a tweet
-        if (message.type === "add-tweet" &&
-            "body" in message &&
-            "id" in message.body) {
+        if (message.type === 'add-tweet' &&
+            'body' in message &&
+            'id' in message.body) {
             fetch(`${BACKEND_URL}/tweet`, {
-                method: "POST",
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json",
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ id: message.body.id }),
+                body: JSON.stringify({ ids: [message.body.id] }),
             })
                 .then((response) => {
                 const messageResponse = response.ok
-                    ? { succeeded: true, message: "Added a tweet." }
-                    : generateErrorMessage("serverError");
+                    ? { succeeded: true, message: 'Added a tweet.' }
+                    : generateErrorMessage('serverError');
                 sendResponse(messageResponse);
             })
                 .catch(() => {
-                sendResponse(generateErrorMessage("networkError"));
+                sendResponse(generateErrorMessage('networkError'));
             });
             return true;
         }
         // get the stored tweet list
-        if (message.type === "get-tweets") {
-            fetch(`${BACKEND_URL}/tweet`, { method: "GET" })
+        if (message.type === 'get-tweets') {
+            fetch(`${BACKEND_URL}/tweet`, { method: 'GET' })
                 .then((response) => {
                 if (!response.ok) {
-                    sendResponse(generateErrorMessage("serverError"));
+                    sendResponse(generateErrorMessage('serverError'));
                 }
                 else {
                     response.json().then((json) => {
@@ -72,13 +72,13 @@ chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
                 return;
             })
                 .catch(() => {
-                sendResponse(generateErrorMessage("networkError"));
+                sendResponse(generateErrorMessage('networkError'));
             });
             return true;
         }
     }
     // invalid message
-    sendResponse(generateErrorMessage("invalidMessage"));
+    sendResponse(generateErrorMessage('invalidMessage'));
     return true;
 });
 

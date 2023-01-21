@@ -41,9 +41,10 @@ const Illust = styled.div<{ aspectRatio: number; selected: boolean }>`
   }
 `;
 
-const Image = styled.img`
+const Image = styled.img<{ blur: boolean }>`
   width: 100%;
   vertical-align: top;
+  filter: blur(${(props) => (props.blur ? 6 : 0)}px);
 `;
 
 interface IllustListProps {
@@ -55,6 +56,7 @@ interface IllustListProps {
   selectedTweetIds: string[];
   selectedTags: string[];
   onlyUnrelated: boolean;
+  isShiftKeyPressed: boolean;
   setSelectedTweetIds: (value: string[]) => void;
 }
 
@@ -67,6 +69,7 @@ const IllustList = ({
   selectedTweetIds,
   selectedTags,
   onlyUnrelated,
+  isShiftKeyPressed,
   setSelectedTweetIds,
 }: IllustListProps) => {
   const [filteredTweets, setFilteredTweets] = useState<Tweet[]>([]);
@@ -108,7 +111,6 @@ const IllustList = ({
         : keywordFilteredTweets;
     setFilteredTweets(filteredTweets);
     setOnlyUnrelatedTweets(undefined);
-    setSelectedTweetIds([]);
   }, [
     originalTweets,
     selectedTags,
@@ -141,9 +143,9 @@ const IllustList = ({
     return tweetsPerColumn;
   }, [filteredTweets, columnCount]);
 
-  const onClickTweet = (e: React.MouseEvent, id: string) => {
+  const onClickTweet = (_: React.MouseEvent, id: string) => {
     setSelectedTweetIds(
-      e.shiftKey
+      isShiftKeyPressed
         ? selectedTweetIds.includes(id)
           ? selectedTweetIds.filter((inId) => inId !== id)
           : [...selectedTweetIds, id]
@@ -152,6 +154,8 @@ const IllustList = ({
         : [id]
     );
   };
+
+  console.log(process.env);
 
   return (
     <Wrapper ref={wrapperRef}>
@@ -164,7 +168,11 @@ const IllustList = ({
               onClick={(e) => onClickTweet(e, tweet.id)}
               key={tweet.id}
             >
-              <Image src={getImageEndpoint(tweet.id, 0)} alt="" />
+              <Image
+                src={getImageEndpoint(tweet.id, 0)}
+                alt=""
+                blur={process.env.BLUR === "true"}
+              />
             </Illust>
           ))}
         </Column>

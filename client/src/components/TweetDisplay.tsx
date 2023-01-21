@@ -33,6 +33,16 @@ const Images = styled.div`
   gap: 10px;
 `;
 
+const ImageWrapper = styled.div<{ blur: boolean }>`
+  width: 100%;
+  filter: blur(${(props) => (props.blur ? 6 : 0)}px);
+  overflow: hidden;
+`;
+
+const Image = styled.img`
+  width: 100%;
+`;
+
 const DateTime = styled.p`
   color: #666;
   font-size: 14px;
@@ -59,6 +69,23 @@ const TweetDisplay = ({ selectedTweet, setKeyword }: TweetDisplayProps) => {
     date.getMonth() + 1
   }月${date.getDay()}日`;
 
+  const body = (
+    <>
+      {selectedTweet.body.split("\n").map((line, index, array) => (
+        <React.Fragment key={index}>
+          {index < array.length - 1 ? (
+            <>
+              {line}
+              <br />
+            </>
+          ) : (
+            line
+          )}
+        </React.Fragment>
+      ))}
+    </>
+  );
+
   return (
     <>
       <header>
@@ -70,10 +97,12 @@ const TweetDisplay = ({ selectedTweet, setKeyword }: TweetDisplayProps) => {
         </ScreenName>
       </header>
       <MainAnchor href={url} target="_blank">
-        <p>{selectedTweet.body}</p>
+        <p>{body}</p>
         <Images>
           {[...Array(selectedTweet.Images.length)].map((_, i) => (
-            <img src={getImageEndpoint(selectedTweet.id, i)} key={i} />
+            <ImageWrapper blur={process.env.BLUR === "true"} key={i}>
+              <Image src={getImageEndpoint(selectedTweet.id, i)} alt="" />
+            </ImageWrapper>
           ))}
         </Images>
         <DateTime>

@@ -6,10 +6,11 @@ import Tag from "./Tag";
 import { linkColor } from "@/const/styles";
 import { addTweetTag, deleteTweetTag, TweetToTag, Work } from "@/utils/api";
 import {
-  getCharacterTag,
-  FilterMethod,
   getAllTags,
+  getCharacterTag,
+  getUniqueCommonTag,
   splitCharacterTag,
+  FilterMethod,
 } from "@/utils/utils";
 
 const Wrapper = styled.nav`
@@ -123,6 +124,7 @@ interface SideNavProps {
   setKeyword: (value: string) => void;
   setFilterMethod: (value: FilterMethod) => void;
   setOnlyUnrelated: (value: boolean) => void;
+  setSelectedTweetIds: (value: string[]) => void;
 }
 
 const SideNav = ({
@@ -140,6 +142,7 @@ const SideNav = ({
   setKeyword,
   setFilterMethod,
   setOnlyUnrelated,
+  setSelectedTweetIds,
 }: SideNavProps) => {
   const [_, setSearchParams] = useSearchParams();
   const allTags = getAllTags(works, commonTags);
@@ -180,6 +183,7 @@ const SideNav = ({
     const filteredTags = tags.filter((tag) => tag.length > 0);
     setSelectedTags(filteredTags);
     updateParams({ newTags: filteredTags });
+    setSelectedTweetIds([]);
   };
 
   const switchSelectWork = (work: string) => {
@@ -193,12 +197,14 @@ const SideNav = ({
         : Array.from(new Set([...selectedTags, ...tags]));
       setSelectedTags(newTags);
       updateParams({ newTags });
+      setSelectedTweetIds([]);
     }
   };
 
   const switchFilterMethod = (method: FilterMethod) => {
     setFilterMethod(method);
     updateParams({ newFilterMethod: method });
+    setSelectedTweetIds([]);
   };
 
   const switchAssociation = (tag: string) => {
@@ -296,15 +302,20 @@ const SideNav = ({
         </div>
         <div>
           <TagList>
-            {commonTags.map((tag) => (
-              <Tag
-                selected={false}
-                tweetAssociated={false}
-                hue={0}
-                label={tag}
-                key={tag}
-              />
-            ))}
+            {commonTags.map((tag) => {
+              const uniqueTag = getUniqueCommonTag(tag);
+              return (
+                <Tag
+                  selected={selectedTags.includes(uniqueTag)}
+                  tweetAssociated={associatedTags.includes(uniqueTag)}
+                  hue={0}
+                  label={tag}
+                  onClickBody={() => switchSelect(uniqueTag)}
+                  onClickPlus={() => switchAssociation(uniqueTag)}
+                  key={tag}
+                />
+              );
+            })}
           </TagList>
         </div>
       </Content>

@@ -15,11 +15,16 @@ export const splitCharacterTag = (
   };
 };
 
+export const getUniqueCommonTag = (tag: string) =>
+  "common" + tagDelimiter + tag;
+
+export const splitUniqueCommonTag = (tag: string) => tag.split(tagDelimiter)[1];
+
 export const getAllTags = (works: Work[], commonTags: string[]) => [
   ...works.flatMap((work) =>
     work.characters.map((character) => getCharacterTag(work, character))
   ),
-  ...commonTags,
+  ...commonTags.map((tag) => getUniqueCommonTag(tag)),
 ];
 
 export const deepCopy = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
