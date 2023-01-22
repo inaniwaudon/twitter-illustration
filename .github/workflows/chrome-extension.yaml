@@ -32,5 +32,5 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: "Latest release"
-          tag_name: "Latest release
+          tag_name: "Latest release"
           files: ./chrome-extension/build/twitter-illustration-chrome-extension.zip
