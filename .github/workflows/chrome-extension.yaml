@@ -28,13 +28,9 @@ jobs:
         with:
           extensionDir: "./chrome-extension/dist"
           zipFilePath: "./chrome-extension/build/twitter-illustration-chrome-extension.zip"
-      - name: Set current datetime as environment variable
-        env:
-          TZ: "Asia/Tokyo"
-        run: echo "CURRENT_DATETIME=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: "${{ env.CURRENT_DATETIME }}"
-          tag_name: "${{ env.CURRENT_DATETIME }}"
+          name: "Latest release"
+          tag_name: "Latest release
           files: ./chrome-extension/build/twitter-illustration-chrome-extension.zip
