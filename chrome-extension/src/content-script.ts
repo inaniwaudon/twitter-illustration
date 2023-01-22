@@ -9,7 +9,9 @@ const callback = () => {
   const url = location.href;
   if (
     !url.includes('/status') ||
-    !document.querySelector('[data-testid="tweetPhoto"]')
+    !document.querySelector(
+      '[data-testid="tweetPhoto"], [data-testid="swipe-to-dismiss"]'
+    )
   ) {
     const existingPlusButtons =
       document.getElementsByClassName(plusButtonClassName);
@@ -19,42 +21,45 @@ const callback = () => {
     return;
   }
 
-  const existingPlusButtons =
-    document.getElementsByClassName(plusButtonClassName);
-  if (existingPlusButtons.length > 0) {
-    return;
-  }
-
   // add a plus button
-  const navigationQuery = '.css-1dbjc4n.r-k4xj1c.r-18u37iz.r-1wtj0ep';
-  const navigation = document.querySelector(navigationQuery);
-  if (!navigation) {
+  const navigationQuery =
+    '[data-testid="tweet"] .css-1dbjc4n.r-k4xj1c.r-18u37iz.r-1wtj0ep';
+  const navigations = document.querySelectorAll(navigationQuery);
+  if (navigations.length === 0) {
     return;
   }
 
   const id = url.replace(/^https:\/\/.*\/status\//, '').replace(/\/.*$/, '');
   const isAlreadyStored = registeredTweets.includes(id);
-  const plusButton = document.createElement('div');
-  plusButton.className = plusButtonClassName;
-  plusButton.innerHTML = isAlreadyStored ? '✓' : '+';
 
-  if (!isAlreadyStored) {
-    const onClickPlusButton = async () => {
-      const response = await sendMessage({
-        type: 'add-tweet',
-        body: { id },
-      });
-      if (response.succeeded) {
-        registeredTweets.push(id);
-        plusButton.innerHTML = '✓';
-        plusButton.removeEventListener('click', onClickPlusButton);
-      } else {
-        alert(`Failed: ${response.message}`);
-      }
-    };
-    plusButton.addEventListener('click', onClickPlusButton);
+  for (let i = 0; i < navigations.length; i++) {
+    if (navigations[i].getElementsByClassName(plusButtonClassName).length > 0) {
+      continue;
+    }
+
+    const plusButton = document.createElement('div');
+    plusButton.className = plusButtonClassName;
+    plusButton.innerHTML = isAlreadyStored ? '✓' : '+';
+
+    if (!isAlreadyStored) {
+      const onClickPlusButton = async () => {
+        const response = await sendMessage({
+          type: 'add-tweet',
+          body: { id },
+        });
+        if (response.succeeded) {
+          registeredTweets.push(id);
+          plusButton.innerHTML = '✓';
+          plusButton.removeEventListener('click', onClickPlusButton);
+        } else {
+          alert(`Failed: ${response.message}`);
+        }
+      };
+      plusButton.addEventListener('click', onClickPlusButton);
+    }
+    navigations[i].appendChild(plusButton);
+    console.log(navigations[i]);
   }
-  navigation.appendChild(plusButton);
 };
 
 window.addEventListener('load', async () => {

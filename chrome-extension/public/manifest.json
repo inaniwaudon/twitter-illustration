@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "twitter-illustration",
   "version": "1.0.0",
-  "description": "",
+  "description": "Twitter の画像を保存し、twitter-illustration で閲覧できるようにします。",
   "content_scripts": [
     {
       "matches": ["https://twitter.com/*"],

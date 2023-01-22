@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { AiOutlineDelete } from "react-icons/ai";
 import { ImArrowUp } from "react-icons/im";
 import { useKeyPressEvent } from "react-use";
@@ -69,14 +69,18 @@ const DeleteIcon = styled.span`
 
 interface StatusProps {
   selectedTweetIds: string[];
+  deletedTweetIds: string[];
   isShiftKeyPressed: boolean;
   setShiftKeyPressed: (value: boolean) => void;
+  setDeletedTweetIds: (value: string[]) => void;
 }
 
 const Status = ({
   selectedTweetIds,
+  deletedTweetIds,
   isShiftKeyPressed,
   setShiftKeyPressed,
+  setDeletedTweetIds,
 }: StatusProps) => {
   useKeyPressEvent(
     "Shift",
@@ -95,6 +99,7 @@ const Status = ({
       )
     ) {
       deleteTweets(selectedTweetIds);
+      setDeletedTweetIds([...deletedTweetIds, ...selectedTweetIds]);
     }
   };
 

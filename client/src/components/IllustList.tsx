@@ -53,6 +53,7 @@ const Image = styled.div<{ src: string; blur: boolean }>`
 
 interface IllustListProps {
   originalTweets: Tweet[];
+  deletedTweetIds: string[];
   tweetToTags: TweetToTag;
   keyword: string;
   displayOptions: DisplayOptions;
@@ -66,6 +67,7 @@ interface IllustListProps {
 
 const IllustList = ({
   originalTweets,
+  deletedTweetIds,
   tweetToTags,
   keyword,
   displayOptions,
@@ -85,14 +87,24 @@ const IllustList = ({
 
   // filter
   useEffect(() => {
+    const remainingTweets = originalTweets.filter(
+      (tweet) => !deletedTweetIds.includes(tweet.id)
+    );
+
     if (onlyUnrelated) {
       if (!onlyUnrelatedTweets) {
-        const filteredTweets = originalTweets.filter(
+        const filteredTweets = remainingTweets.filter(
           (tweet) =>
             !(tweet.id in tweetToTags) || tweetToTags[tweet.id].length === 0
         );
         setFilteredTweets(filteredTweets);
         setOnlyUnrelatedTweets(filteredTweets);
+      } else {
+        setFilteredTweets(
+          onlyUnrelatedTweets.filter(
+            (tweet) => !deletedTweetIds.includes(tweet.id)
+          )
+        );
       }
       return;
     }
@@ -100,11 +112,11 @@ const IllustList = ({
     const keywordFilteredTweets =
       keyword.length > 0
         ? keyword.startsWith("@")
-          ? originalTweets.filter((tweet) =>
+          ? remainingTweets.filter((tweet) =>
               tweet.User.screenName.startsWith(keyword.slice(1))
             )
-          : originalTweets.filter((tweet) => tweet.body.includes(keyword))
-        : originalTweets;
+          : remainingTweets.filter((tweet) => tweet.body.includes(keyword))
+        : remainingTweets;
     const filteredTweets =
       selectedTags.length > 0
         ? keywordFilteredTweets.filter((tweet) =>
@@ -117,6 +129,7 @@ const IllustList = ({
     setOnlyUnrelatedTweets(undefined);
   }, [
     originalTweets,
+    deletedTweetIds,
     selectedTags,
     keyword,
     tweetToTags,
@@ -130,7 +143,6 @@ const IllustList = ({
       : tweet.Images[0].height / tweet.Images[0].width;
 
   const tweetRows = useMemo(() => {
-    // TODO: when no image exists.
     const totalHeight = filteredTweets
       .filter((tweet) => tweet.Images.length > 0)
       .map((tweet) => getRatio(tweet))

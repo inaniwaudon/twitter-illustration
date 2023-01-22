@@ -30,10 +30,10 @@ jobs:
         uses: cardinalby/webext-buildtools-pack-extension-dir-action@v1
         with:
           extensionDir: "./chrome-extension/dist"
-          zipFilePath: "./chrome-extension/build/chrome-extension.zip"
+          zipFilePath: "./chrome-extension/build/twitter-illustration-chrome-extension.zip"
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           name: "v1.0"
           tag_name: "v1.0"
-          files: ./chrome-extension/build/chrome-extension.zip
+          files: ./chrome-extension/build/twitter-illustration-chrome-extension.zip
