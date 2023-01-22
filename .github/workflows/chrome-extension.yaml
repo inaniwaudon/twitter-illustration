@@ -35,6 +35,6 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: "$CURRENT_DATETIME"
-          tag_name: "$CURRENT_DATETIME"
+          name: "${{ env.CURRENT_DATETIME }}"
+          tag_name: "${{ env.CURRENT_DATETIME }}"
           files: ./chrome-extension/build/twitter-illustration-chrome-extension.zip
