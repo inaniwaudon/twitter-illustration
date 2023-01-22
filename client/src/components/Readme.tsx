@@ -61,7 +61,7 @@ const Readme = () => (
     </Paragpraph>
     <H3>拡張機能から</H3>
     <Paragpraph>
-      Chrome 拡張を導入して、ツイートのページに表示される +
+      Chrome 拡張機能を導入して、ツイートのページに表示される +
       アイコンをクリックします
     </Paragpraph>
     <H2>絞り込み</H2>
@@ -78,7 +78,7 @@ const Readme = () => (
     </Paragpraph>
     <H2>タグの編集</H2>
     <Paragpraph>
-      background/data 以下にある JSON ファイル works.json, common-tag.json
+      backend/data 以下にある JSON ファイル works.json, common-tag.json
       を編集します。
     </Paragpraph>
   </Wrapper>
