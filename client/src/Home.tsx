@@ -88,6 +88,7 @@ const Home = () => {
   const [searchParams, _] = useSearchParams();
 
   const [originalTweets, setOriginalTweets] = useState<Tweet[]>([]);
+  const [deletedTweetIds, setDeletedTweetIds] = useState<string[]>([]);
   const [selectedTweetIds, setSelectedTweetIds] = useState<string[]>([]);
   const [keyword, setKeyword] = useState<string>("");
   const [displayOptions, _setDisplayOptions] = useState<DisplayOptions>({
@@ -197,6 +198,7 @@ const Home = () => {
       <Main>
         <IllustList
           originalTweets={originalTweets}
+          deletedTweetIds={deletedTweetIds}
           tweetToTags={tweetToTags}
           keyword={keyword}
           displayOptions={displayOptions}
@@ -219,8 +221,10 @@ const Home = () => {
       <StatusWrapper>
         <Status
           selectedTweetIds={selectedTweetIds}
+          deletedTweetIds={deletedTweetIds}
           isShiftKeyPressed={isShiftKeyPressed}
           setShiftKeyPressed={setShiftKeyPressed}
+          setDeletedTweetIds={setDeletedTweetIds}
         />
       </StatusWrapper>
       <AddTweetWrapper>

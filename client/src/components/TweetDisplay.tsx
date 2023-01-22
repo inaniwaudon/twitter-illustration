@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { linkColor } from "@/const/styles";
+import { blurRange, linkColor } from "@/const/styles";
 import { getImageEndpoint, Tweet } from "@/utils/api";
 
 const Name = styled.p`
@@ -35,7 +35,7 @@ const Images = styled.div`
 
 const ImageWrapper = styled.div<{ blur: boolean }>`
   width: 100%;
-  filter: blur(${(props) => (props.blur ? 6 : 0)}px);
+  filter: blur(${(props) => (props.blur ? blurRange : 0)}px);
   overflow: hidden;
 `;
 

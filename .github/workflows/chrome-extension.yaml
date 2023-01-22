@@ -1,9 +1,6 @@
 name: Release chrome extension
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
   workflow_dispatch:
 
 permissions:
@@ -30,10 +27,14 @@ jobs:
         uses: cardinalby/webext-buildtools-pack-extension-dir-action@v1
         with:
           extensionDir: "./chrome-extension/dist"
-          zipFilePath: "./chrome-extension/build/chrome-extension.zip"
+          zipFilePath: "./chrome-extension/build/twitter-illustration-chrome-extension.zip"
+      - name: Set current datetime as environment variable
+        env:
+          TZ: "Asia/Tokyo"
+        run: echo "CURRENT_DATETIME=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_ENV
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          name: "v1.0"
-          tag_name: "v1.0"
-          files: ./chrome-extension/build/chrome-extension.zip
+          name: "$CURRENT_DATETIME"
+          tag_name: "$CURRENT_DATETIME"
+          files: ./chrome-extension/build/twitter-illustration-chrome-extension.zip
