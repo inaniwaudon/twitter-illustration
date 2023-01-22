@@ -23,3 +23,19 @@ jobs:
       - name: Build
         run: yarn run build
         working-directory: ./chrome-extension
+      - id: packExtensionDir
+        uses: cardinalby/webext-buildtools-pack-extension-dir-action@v1
+        with:
+          extensionDir: "./chrome-extension/dist"
+          zipFilePath: "./chrome-extension/build/my-extension.zip"
+      - uses: cardinalby/webext-buildtools-chrome-crx-action@v2
+        with:
+          zipFilePath: "./chrome-extension/build/my-extension.zip"
+          crxFilePath: "./chrome-extension/build/my-extension.crx"
+          privateKey: ${{ secrets.CHROME_CRX_PRIVATE_KEY }},
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "v1.0"
+          tag_name: "v1.0"
+          files: ./chrome-extension/build/my-extension.crx
