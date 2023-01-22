@@ -2,7 +2,7 @@
 
 Twitter 上の画像を保存し、一覧表示するための Web アプリケーション
 
-＜スクリーンショット＞
+![スクリーンショット](./screenshot.png)
 
 ## 機能
 本アプリケーションは主に以下の機能を備えます。
@@ -60,7 +60,7 @@ yarn run start
 
 ### Chrome 拡張機能
 
-[Releases](https://github.com/inaniwaudon/twitter-illustration/releases) から `chrome-extension.zip` を取得し、解凍します。続いて chrome://extensions にアクセスし、デベロッパーモードを有効にした状態で「パッケージ化されていない拡張機能を読み込む」から解凍したディレクトリを読み込み、拡張機能を追加および有効化します。
+[Releases](https://github.com/inaniwaudon/twitter-illustration/releases) から `twitter-illustration-chrome-extension.zip` を取得し、解凍します。続いて chrome://extensions にアクセスし、デベロッパーモードを有効にした状態で「パッケージ化されていない拡張機能を読み込む」から解凍したディレクトリを読み込み、拡張機能を追加および有効化します。
 
 ## 使用方法
 

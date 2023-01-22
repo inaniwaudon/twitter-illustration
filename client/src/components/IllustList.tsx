@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import { defaultBoxShadow, getKeyColor } from "@/const/styles";
+import { blurRange, defaultBoxShadow, getKeyColor } from "@/const/styles";
 import { getImageEndpoint, Tweet, TweetToTag } from "@/utils/api";
 import { DisplayOptions, FilterMethod } from "@/utils/utils";
 
@@ -48,7 +48,7 @@ const Image = styled.div<{ src: string; blur: boolean }>`
   background-image: url("${(props) => props.src}");
   background-position: center;
   background-size: cover;
-  filter: blur(${(props) => (props.blur ? 6 : 0)}px);
+  filter: blur(${(props) => (props.blur ? blurRange : 0)}px);
 `;
 
 interface IllustListProps {
