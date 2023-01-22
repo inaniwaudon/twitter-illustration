@@ -60,7 +60,7 @@ yarn run start
 
 ### Chrome 拡張機能
 
-[Releases](https://github.com/inaniwaudon/twitter-illustration/releases) からパッケージ化されたファイルを取得し、Chrome にドラッグ・アンド・ドロップして拡張機能 twitter-illustration を追加します。
+[Releases](https://github.com/inaniwaudon/twitter-illustration/releases) から `chrome-extension.zip` を取得し、解凍します。続いて chrome://extensions にアクセスし、デベロッパーモードを有効にした状態で「パッケージ化されていない拡張機能を読み込む」から解凍したディレクトリを読み込み、拡張機能を追加および有効化します。
 
 ## 使用方法
 

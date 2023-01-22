@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: Build
+    name: Build and release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,15 +30,10 @@ jobs:
         uses: cardinalby/webext-buildtools-pack-extension-dir-action@v1
         with:
           extensionDir: "./chrome-extension/dist"
-          zipFilePath: "./chrome-extension/build/my-extension.zip"
-      - uses: cardinalby/webext-buildtools-chrome-crx-action@v2
-        with:
-          zipFilePath: "./chrome-extension/build/my-extension.zip"
-          crxFilePath: "./chrome-extension/build/my-extension.crx"
-          privateKey: ${{ secrets.CHROME_CRX_PRIVATE_KEY }},
+          zipFilePath: "./chrome-extension/build/chrome-extension.zip"
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           name: "v1.0"
           tag_name: "v1.0"
-          files: ./chrome-extension/build/my-extension.crx
+          files: ./chrome-extension/build/chrome-extension.zip
