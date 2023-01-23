@@ -1,5 +1,5 @@
 import { MessageRequest, MessageResponse } from './request';
-import browser from "webextension-polyfill";
+import browser from 'webextension-polyfill';
 
 const BACKEND_URL = 'http://localhost:3030';
 
@@ -35,8 +35,8 @@ browser.runtime.onMessage.addListener(
             const messageResponse: MessageResponse = response.ok
               ? { succeeded: true, message: 'Added a tweet.' }
               : generateErrorMessage('serverError');
-              //sendResponse(messageResponse);
-              return messageResponse;
+            //sendResponse(messageResponse);
+            return messageResponse;
           })
           .catch(() => {
             //sendResponse(generateErrorMessage('networkError'));
@@ -52,10 +52,10 @@ browser.runtime.onMessage.addListener(
             if (!response.ok) {
               //sendResponse(generateErrorMessage('serverError'));
               //return generateErrorMessage('serverError');
-              throw new Error("serverError")
+              throw new Error('serverError');
             } else {
               return response.json();
-                /*
+              /*
                 sendResponse({
                   succeeded: true,
                   body: json,
@@ -72,7 +72,8 @@ browser.runtime.onMessage.addListener(
           .catch((error) => {
             //sendResponse(generateErrorMessage('networkError'));
             //return Promise.resolve(generateErrorMessage('networkError'));
-            if ("serverError" === error) return generateErrorMessage('serverError');
+            if ('serverError' === error)
+              return generateErrorMessage('serverError');
             return generateErrorMessage('networkError');
           });
         //return true;

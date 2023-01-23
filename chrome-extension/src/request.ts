@@ -1,4 +1,4 @@
-import browser from "webextension-polyfill";
+import browser from 'webextension-polyfill';
 
 export interface MessageResponse {
   succeeded: boolean;
@@ -12,6 +12,8 @@ export interface MessageRequest {
   body?: any;
 }
 
-export const sendMessage = (request: MessageRequest): Promise<MessageResponse> => {
+export const sendMessage = (
+  request: MessageRequest
+): Promise<MessageResponse> => {
   return browser.runtime.sendMessage(request);
-}
+};
