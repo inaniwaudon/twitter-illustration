@@ -3,7 +3,6 @@ import fs from "fs";
 import { Client } from "twitter-api-sdk";
 import { CustomError } from "./error";
 import db from "../models/index";
-import fetch from "node-fetch";
 
 dotenv.config();
 const client = new Client(process.env.TWITTER_BEARER_TOKEN);
