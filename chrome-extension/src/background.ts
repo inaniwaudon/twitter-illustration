@@ -1,4 +1,5 @@
 import { MessageRequest, MessageResponse } from './request';
+import browser from "webextension-polyfill";
 
 const BACKEND_URL = 'http://localhost:3030';
 
@@ -14,8 +15,8 @@ const generateErrorMessage = (
       : 'Invalid message.',
 });
 
-chrome.runtime.onMessage.addListener(
-  (message: MessageRequest, _, sendResponse) => {
+browser.runtime.onMessage.addListener(
+  async (message: MessageRequest, _): Promise<MessageResponse> => {
     if (message && message instanceof Object && 'type' in message) {
       // add a tweet
       if (
@@ -23,7 +24,7 @@ chrome.runtime.onMessage.addListener(
         'body' in message &&
         'id' in message.body
       ) {
-        fetch(`${BACKEND_URL}/tweet`, {
+        return fetch(`${BACKEND_URL}/tweet`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -34,39 +35,53 @@ chrome.runtime.onMessage.addListener(
             const messageResponse: MessageResponse = response.ok
               ? { succeeded: true, message: 'Added a tweet.' }
               : generateErrorMessage('serverError');
-            sendResponse(messageResponse);
+              //sendResponse(messageResponse);
+              return messageResponse;
           })
           .catch(() => {
-            sendResponse(generateErrorMessage('networkError'));
+            //sendResponse(generateErrorMessage('networkError'));
+            return generateErrorMessage('networkError');
           });
-        return true;
+        //return true;
       }
 
       // get the stored tweet list
       if (message.type === 'get-tweets') {
-        fetch(`${BACKEND_URL}/tweet`, { method: 'GET' })
+        return fetch(`${BACKEND_URL}/tweet`, { method: 'GET' })
           .then((response) => {
             if (!response.ok) {
-              sendResponse(generateErrorMessage('serverError'));
+              //sendResponse(generateErrorMessage('serverError'));
+              //return generateErrorMessage('serverError');
+              throw new Error("serverError")
             } else {
-              response.json().then((json) => {
+              return response.json();
+                /*
                 sendResponse({
                   succeeded: true,
                   body: json,
                 });
-              });
+                 */
             }
-            return;
           })
-          .catch(() => {
-            sendResponse(generateErrorMessage('networkError'));
+          .then((json) => {
+            return {
+              succeeded: true,
+              body: json,
+            } as MessageResponse;
+          })
+          .catch((error) => {
+            //sendResponse(generateErrorMessage('networkError'));
+            //return Promise.resolve(generateErrorMessage('networkError'));
+            if ("serverError" === error) return generateErrorMessage('serverError');
+            return generateErrorMessage('networkError');
           });
-        return true;
+        //return true;
       }
     }
 
     // invalid message
-    sendResponse(generateErrorMessage('invalidMessage'));
-    return true;
+    //sendResponse(generateErrorMessage('invalidMessage'));
+    return Promise.resolve(generateErrorMessage('networkError'));
+    //return true;
   }
 );
