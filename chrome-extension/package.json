@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "TARGET_BROWSER=chrome webpack",
+    "build-firefox": "TARGET_BROWSER=firefox webpack",
     "watch": "webpack -w",
+    "watch-firefox": "TARGET_BROWSER=firefox webpack -w",
     "lint": "eslint src",
     "format": "prettier --write src"
   },

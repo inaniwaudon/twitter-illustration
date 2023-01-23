@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+  "name": "twitter-illustration",
+  "version": "1.0.0",
+  "description": "Twitter の画像を保存し、twitter-illustration で閲覧できるようにします。",
+  "content_scripts": [
+    {
+      "matches": ["https://twitter.com/*"],
+      "css": ["style.css"],
+      "js": ["content-script.js"]
+    }
+  ],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "permissions": ["http://localhost:3030/*"]
+}
