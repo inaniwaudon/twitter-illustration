@@ -211,6 +211,7 @@ sketch
 *.pem
 
 # backend
-backend/images
+backend/images/*
+!backend/images/.gitkeep
 backend/test
 *.sqlite3
