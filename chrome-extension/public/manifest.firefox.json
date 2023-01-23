@@ -13,5 +13,5 @@
   "background": {
     "scripts": ["background.js"]
   },
-  "permissions": ["http://localhost:3030/*"]
+  "permissions": ["http://localhost/*"]
 }
