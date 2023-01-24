@@ -24,65 +24,45 @@ browser.runtime.onMessage.addListener(
         'body' in message &&
         'id' in message.body
       ) {
-        return fetch(`${BACKEND_URL}/tweet`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ ids: [message.body.id] }),
-        })
-          .then((response) => {
-            const messageResponse: MessageResponse = response.ok
-              ? { succeeded: true, message: 'Added a tweet.' }
-              : generateErrorMessage('serverError');
-            //sendResponse(messageResponse);
-            return messageResponse;
-          })
-          .catch(() => {
-            //sendResponse(generateErrorMessage('networkError'));
-            return generateErrorMessage('networkError');
+        try {
+          const response = await fetch(`${BACKEND_URL}/tweet`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ids: [message.body.id] }),
           });
-        //return true;
+          return response.ok
+            ? { succeeded: true, message: 'Added a tweet.' }
+            : generateErrorMessage('serverError');
+        } catch {
+          return generateErrorMessage('networkError');
+        }
       }
 
       // get the stored tweet list
       if (message.type === 'get-tweets') {
-        return fetch(`${BACKEND_URL}/tweet`, { method: 'GET' })
-          .then((response) => {
-            if (!response.ok) {
-              //sendResponse(generateErrorMessage('serverError'));
-              //return generateErrorMessage('serverError');
-              throw new Error('serverError');
-            } else {
-              return response.json();
-              /*
-                sendResponse({
-                  succeeded: true,
-                  body: json,
-                });
-                 */
-            }
-          })
-          .then((json) => {
-            return {
-              succeeded: true,
-              body: json,
-            } as MessageResponse;
-          })
-          .catch((error) => {
-            //sendResponse(generateErrorMessage('networkError'));
-            //return Promise.resolve(generateErrorMessage('networkError'));
-            if ('serverError' === error)
-              return generateErrorMessage('serverError');
-            return generateErrorMessage('networkError');
+        try {
+          const response = await fetch(`${BACKEND_URL}/tweet`, {
+            method: 'GET',
           });
-        //return true;
+          if (!response.ok) {
+            throw new Error('serverError');
+          }
+          return {
+            succeeded: true,
+            body: await response.json(),
+          };
+        } catch (error) {
+          if ('serverError' === error) {
+            return generateErrorMessage('serverError');
+          }
+          return generateErrorMessage('networkError');
+        }
       }
     }
 
     // invalid message
-    //sendResponse(generateErrorMessage('invalidMessage'));
-    return Promise.resolve(generateErrorMessage('networkError'));
-    //return true;
+    return generateErrorMessage('invalidMessage');
   }
 );
