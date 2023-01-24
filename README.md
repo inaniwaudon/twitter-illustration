@@ -45,6 +45,26 @@ PORT=3030
 TWITTER_BEARER_TOKEN=<BEARER_TOKEN>
 ```
 
+また、`backend/data` 以下に、タグの分類に使用する以下の JSON ファイルを追加します。
+
+`backend/data/works.json`
+
+```json
+[
+  {
+    "title": "作品名",
+    "alias": ["別名"],
+    "characters": ["登場人物1", "登場人物2", "登場人物3"]
+  }
+]
+```
+
+`backend/data/common-tag.json`
+
+```json
+["タグ1", "タグ2", "タグ3"]
+```
+
 起動
 
 ```bash

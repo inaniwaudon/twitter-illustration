@@ -211,6 +211,8 @@ sketch
 *.pem
 
 # backend
+backend/data/
+!backend/data/*.json
 backend/images/*
 !backend/images/.gitkeep
 backend/test
