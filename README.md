@@ -58,9 +58,19 @@ npx sequelize-cli-esm db:migrate
 yarn run start
 ```
 
-### Chrome 拡張機能
+## ブラウザ拡張機能
 
-[Releases](https://github.com/inaniwaudon/twitter-illustration/releases) から `twitter-illustration-chrome-extension.zip` を取得し、解凍します。続いて chrome://extensions にアクセスし、デベロッパーモードを有効にした状態で「パッケージ化されていない拡張機能を読み込む」から解凍したディレクトリを読み込み、拡張機能を追加および有効化します。
+Google Chrome または Firefox から、twitter-illustration にツイートを直接追加するための拡張機能を利用できます。
+
+[Releases](https://github.com/inaniwaudon/twitter-illustration/releases) から `twitter-illustration-chrome-extension.zip` または `twitter-illustration-firefox-extension.zip` を取得し、解凍してください。
+
+### Google Chrome
+
+chrome://extensions にアクセスし、デベロッパーモードを有効にした状態で「パッケージ化されていない拡張機能を読み込む」から解凍したディレクトリを読み込み、拡張機能を有効化します。
+
+### Firefox
+
+about:debugging を開き、「この Firefox」→「一時的なアドオンを読み込む…」から解凍したディレクトリ内の `manifest.json` を選択します。
 
 ## 使用方法
 
@@ -68,7 +78,7 @@ yarn run start
 
 **ツイートの追加**
 
-上記の Google Chrome 拡張機能を導入し、ツイートのページ（https://twitter.com/id/status/...）に表示される + アイコンをクリックします。
+Google Chrome または Firefox に拡張機能を導入し、ツイートのページ（https://twitter.com/id/status/...）に表示される + アイコンをクリックします。
 または、アプリケーション右下に表示される + ボタンをクリックしてツイートの URL を入力します。  
 追加したツイートの表示はページリロード後に反映されます。
 
