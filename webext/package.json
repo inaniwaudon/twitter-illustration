@@ -8,7 +8,7 @@
     "watch": "webpack -w",
     "watch-firefox": "TARGET_BROWSER=firefox webpack -w",
     "lint": "eslint src",
-    "format": "prettier --write src"
+    "format": "prettier --write src webpack.config.js"
   },
   "license": "MIT",
   "devDependencies": {

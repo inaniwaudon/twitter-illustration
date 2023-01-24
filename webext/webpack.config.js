@@ -1,7 +1,7 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const { EnvironmentPlugin } = require('webpack');
-const process = require("process");
+const process = require('process');
 
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
@@ -27,13 +27,13 @@ module.exports = {
     extensions: ['.ts', '.js'],
   },
   plugins: [
-    new EnvironmentPlugin(["TARGET_BROWSER"]),
+    new EnvironmentPlugin(['TARGET_BROWSER']),
     new CopyPlugin({
       patterns: [
-        { from: 'public/style.css'},
-        process.env.TARGET_BROWSER === "firefox"
-        ? {from: 'public/manifest.firefox.json', to: 'manifest.json'}
-        : {from: 'public/manifest.json'},
+        { from: 'public/style.css' },
+        process.env.TARGET_BROWSER === 'firefox'
+          ? { from: 'public/manifest.firefox.json', to: 'manifest.json' }
+          : { from: 'public/manifest.json' },
       ],
     }),
   ],
