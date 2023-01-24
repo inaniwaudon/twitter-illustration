@@ -4,5 +4,5 @@
 
 ```bash
 BACKEND_URL=http://localhost:3030
-BLUE=false  # true のとき、画像にぼかしを掛ける
+BLUR=false  # true のとき、画像にぼかしを掛ける
 ```
