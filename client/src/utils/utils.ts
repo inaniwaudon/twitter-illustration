@@ -1,9 +1,9 @@
-import { Work } from "@/utils/api";
+import { Character, Work } from "@/utils/api";
 
 const tagDelimiter = "/";
 
-export const getCharacterTag = (work: Work, character: string) =>
-  work.title + tagDelimiter + character;
+export const getCharacterTag = (work: Work, character: Character) =>
+  work.title + tagDelimiter + character.name;
 
 export const splitCharacterTag = (
   tag: string

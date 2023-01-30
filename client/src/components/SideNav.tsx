@@ -289,7 +289,7 @@ const SideNav = ({
                         selected={selectedTags.includes(tag)}
                         tweetAssociated={associatedTags.includes(tag)}
                         hue={tagHues[tag]}
-                        label={character}
+                        label={character.name}
                         onClickBody={() => switchSelect(tag)}
                         onClickPlus={() => switchAssociation(tag)}
                         key={tag}

@@ -3,7 +3,12 @@ import urlJoin from "url-join";
 export interface Work {
   title: string;
   aliases: string[];
-  characters: string[];
+  characters: Character[];
+}
+
+export interface Character {
+  name: string;
+  color?: string;
 }
 
 export interface Tweet {
