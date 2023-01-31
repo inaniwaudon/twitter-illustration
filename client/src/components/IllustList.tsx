@@ -185,15 +185,25 @@ const IllustList = ({
     if (e.ctrlKey || e.metaKey) {
       const rect = e.currentTarget.getBoundingClientRect();
 
-      // TODO: square
       // get color
       const img = new Image();
       img.src = getImageEndpoint(id, 0);
       await loadImage(img);
+
+      let x = e.clientX - rect.x;
+      let y = e.clientY - rect.y;
+      if (displayOptions.isSquare) {
+        if (img.naturalWidth > img.naturalHeight) {
+          x += ((img.naturalWidth / img.naturalHeight - 1.0) * rect.height) / 2;
+        } else {
+          y += ((img.naturalHeight / img.naturalWidth - 1.0) * rect.width) / 2;
+        }
+      }
+
       const pixel = await getImagePixel(
         img,
-        (e.clientX - rect.x) / rect.width,
-        (e.clientY - rect.y) / rect.height,
+        x / rect.width,
+        y / ((img.height / img.width) * rect.width),
         rect.width
       );
 
