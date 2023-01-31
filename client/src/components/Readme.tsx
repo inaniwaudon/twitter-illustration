@@ -75,6 +75,9 @@ const Readme = () => (
     <Paragpraph>
       ツイートを選択した状態で、左サイドパネルの <IoPricetag />{" "}
       をクリックします。
+      <br />
+      Ctrl
+      キーを押しながら画像をクリックすると、画素色と類似するカラーのキャラクターを提示します。
     </Paragpraph>
     <H2>タグの編集</H2>
     <Paragpraph>
