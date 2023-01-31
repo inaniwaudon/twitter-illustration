@@ -46,6 +46,7 @@ TWITTER_BEARER_TOKEN=<BEARER_TOKEN>
 ```
 
 また、`backend/data` 以下に、タグの分類に使用する以下の JSON ファイルを追加します。
+`characters` には、16 進数でカラーコードを指定できます。
 
 `backend/data/works.json`
 
@@ -54,7 +55,11 @@ TWITTER_BEARER_TOKEN=<BEARER_TOKEN>
   {
     "title": "作品名",
     "alias": ["別名"],
-    "characters": ["登場人物1", "登場人物2", "登場人物3"]
+    "characters": [
+      "登場人物1",
+      { "name": "登場人物2", "color": "#カラーコード" },
+      { "name": "登場人物3", "color": "#カラーコード" }
+    ]
   }
 ]
 ```
