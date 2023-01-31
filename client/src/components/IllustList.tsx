@@ -1,8 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
+import ColorTags from "./ColorTags";
 import { blurRange, defaultBoxShadow, getKeyColor } from "@/const/styles";
-import { getImageEndpoint, Tweet, TweetToTag } from "@/utils/api";
-import { DisplayOptions, FilterMethod } from "@/utils/utils";
+import { getImageEndpoint, Tweet, TweetToTag, Work } from "@/utils/api";
+import {
+  getImagePixel,
+  loadImage,
+  Color,
+  DisplayOptions,
+  FilterMethod,
+} from "@/utils/utils";
 
 const Wrapper = styled.div`
   min-height: calc(100vh - 40px);
@@ -41,7 +48,7 @@ const Illust = styled.div<{ aspectRatio: number; selected: boolean }>`
   }
 `;
 
-const Image = styled.div<{ src: string; blur: boolean }>`
+const DivImage = styled.div<{ src: string; blur: boolean }>`
   width: 100%;
   height: 100%;
   vertical-align: top;
@@ -55,32 +62,41 @@ interface IllustListProps {
   originalTweets: Tweet[];
   deletedTweetIds: string[];
   tweetToTags: TweetToTag;
+  works: Work[];
   keyword: string;
   displayOptions: DisplayOptions;
   filterMethod: FilterMethod;
   selectedTweetIds: string[];
   selectedTags: string[];
+  associatedTags: string[];
   onlyUnrelated: boolean;
   isShiftKeyPressed: boolean;
   setSelectedTweetIds: (value: string[]) => void;
+  inSwitchAssociation: (tag: string) => void;
 }
 
 const IllustList = ({
   originalTweets,
   deletedTweetIds,
   tweetToTags,
+  works,
   keyword,
   displayOptions,
   filterMethod,
   selectedTweetIds,
   selectedTags,
+  associatedTags,
   onlyUnrelated,
   isShiftKeyPressed,
   setSelectedTweetIds,
+  inSwitchAssociation,
 }: IllustListProps) => {
   const [filteredTweets, setFilteredTweets] = useState<Tweet[]>([]);
   const [onlyUnrelatedTweets, setOnlyUnrelatedTweets] = useState<Tweet[]>();
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const [pixelColor, setPixelColor] = useState<Color>();
+  const [mousePoint, setMousePoint] = useState<[number, number]>();
 
   const matchesTweet = (tweet: Tweet, tag: string) =>
     tweet.id in tweetToTags && tweetToTags[tweet.id].includes(tag);
@@ -165,38 +181,79 @@ const IllustList = ({
     return tweetsPerColumn;
   }, [filteredTweets, displayOptions]);
 
-  const onClickTweet = (_: React.MouseEvent, id: string) => {
-    setSelectedTweetIds(
-      isShiftKeyPressed
-        ? selectedTweetIds.includes(id)
-          ? selectedTweetIds.filter((inId) => inId !== id)
-          : [...selectedTweetIds, id]
-        : selectedTweetIds.includes(id)
-        ? []
-        : [id]
-    );
+  const onClickTweet = async (e: React.MouseEvent, id: string) => {
+    if (e.ctrlKey || e.metaKey) {
+      const rect = e.currentTarget.getBoundingClientRect();
+
+      // TODO: square
+      // get color
+      const img = new Image();
+      img.src = getImageEndpoint(id, 0);
+      await loadImage(img);
+      const pixel = await getImagePixel(
+        img,
+        (e.clientX - rect.x) / rect.width,
+        (e.clientY - rect.y) / rect.height,
+        rect.width
+      );
+
+      setPixelColor(pixel);
+      setMousePoint([e.clientX, e.clientY]);
+      if (selectedTweetIds.length === 0) {
+        setSelectedTweetIds([id]);
+      }
+    } else {
+      if (!pixelColor || !mousePoint) {
+        setSelectedTweetIds(
+          isShiftKeyPressed
+            ? selectedTweetIds.includes(id)
+              ? selectedTweetIds.filter((inId) => inId !== id)
+              : [...selectedTweetIds, id]
+            : selectedTweetIds.includes(id)
+            ? []
+            : [id]
+        );
+      }
+      setPixelColor(undefined);
+      setMousePoint(undefined);
+    }
   };
 
   return (
-    <Wrapper ref={wrapperRef}>
-      {tweetRows.map((row, i) => (
-        <Column columnCount={displayOptions.columns} key={i}>
-          {row.map((tweet) => (
-            <Illust
-              aspectRatio={displayOptions.isSquare ? 1 : getRatio(tweet)}
-              selected={selectedTweetIds.includes(tweet.id)}
-              onClick={(e) => onClickTweet(e, tweet.id)}
-              key={tweet.id}
-            >
-              <Image
-                src={getImageEndpoint(tweet.id, 0)}
-                blur={process.env.BLUR === "true"}
-              />
-            </Illust>
-          ))}
-        </Column>
-      ))}
-    </Wrapper>
+    <>
+      <Wrapper ref={wrapperRef}>
+        {tweetRows.map((row, i) => (
+          <Column columnCount={displayOptions.columns} key={i}>
+            {row.map((tweet) => {
+              return (
+                <Illust
+                  aspectRatio={displayOptions.isSquare ? 1 : getRatio(tweet)}
+                  selected={selectedTweetIds.includes(tweet.id)}
+                  onClick={(e) => onClickTweet(e, tweet.id)}
+                  key={tweet.id}
+                >
+                  <DivImage
+                    src={getImageEndpoint(tweet.id, 0)}
+                    blur={process.env.BLUR === "true"}
+                  />
+                </Illust>
+              );
+            })}
+          </Column>
+        ))}
+      </Wrapper>
+      {mousePoint && pixelColor ? (
+        <ColorTags
+          works={works}
+          point={mousePoint}
+          color={pixelColor}
+          associatedTags={associatedTags}
+          inSwitchAssociation={inSwitchAssociation}
+        />
+      ) : (
+        <></>
+      )}
+    </>
   );
 };
 

@@ -8,7 +8,7 @@ export interface Work {
 
 export interface Character {
   name: string;
-  color?: string;
+  color?: string[];
 }
 
 export interface Tweet {
