@@ -16,12 +16,26 @@ TWITTER_BEARER_TOKEN=<BEARER_TOKEN>
   {
     "title": "ぼっち・ざ・ろっく！",
     "alias": ["ぼざろ"],
-    "characters": ["後藤ひとり", "喜多郁代", "伊知地虹夏", "山田リョウ", "伊知地星歌", "廣井きくり"]
+    "characters": [
+      { "name": "後藤ひとり", "color": ["#eba6b6"] },
+      { "name": "伊知地虹夏", "color": ["#ecd072"] },
+      { "name": "喜多郁代", "color": ["#c15e53", "#da5448"] },
+      { "name": "山田リョウ", "color": ["#4260a1"] },
+      { "name": "伊知地星歌", "color": ["#d6be76"] },
+      { "name": "廣井きくり", "color": ["#b5677d"] },
+      { "name": "後藤ふたり", "color": ["#f1a3b0"] },
+      { "name": "後藤美智代", "color": ["#e1a1b1"] },
+      { "name": "PAさん" }
+    ]
   },
   {
     "title": "まちカドまぞく",
     "alias": ["まぞく"],
-    "characters": ["吉田優子", "千代田桃", "陽夏木ミカン"]
+    "characters": [
+      { "name": "吉田優子", "color": ["#cd6561"] },
+      { "name": "千代田桃", "color": ["#ffbecd"] },
+      { "name": "陽夏木ミカン", "color": ["#f4b07f"] }
+    ]
   },
   {
     "title": "やはり俺の青春ラブコメはまちがっている。",

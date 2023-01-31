@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import AddTweet from "./components/AddTweet";
@@ -19,6 +19,7 @@ import {
 import {
   getCharacterTag,
   getAllTags,
+  switchAssociation,
   DisplayOptions,
   FilterMethod,
 } from "./utils/utils";
@@ -107,6 +108,25 @@ const Home = () => {
   const [commonTags, setCommonTags] = useState<string[]>([]);
   const [tagHues, setTagHues] = useState<{ [key in string]: number }>({});
   const [tweetToTags, setTweetToTags] = useState<TweetToTag>({});
+  const allTags = getAllTags(works, commonTags);
+
+  const associatedTags = useMemo(() => {
+    if (
+      selectedTweetIds.length === 0 ||
+      !selectedTweetIds.every((id) => id in tweetToTags)
+    ) {
+      return [];
+    }
+    return allTags.filter((tag) =>
+      selectedTweetIds.every((id) => tweetToTags[id].includes(tag))
+    );
+  }, [allTags, selectedTweetIds, tweetToTags]);
+
+  const inSwitchAssociation = (tag: string) => {
+    setTweetToTags(
+      switchAssociation(selectedTweetIds, tag, associatedTags, tweetToTags)
+    );
+  };
 
   // filter
   const [filterMethod, setFilterMethod] = useState<FilterMethod>("or");
@@ -181,18 +201,17 @@ const Home = () => {
           works={works}
           commonTags={commonTags}
           tagHues={tagHues}
-          tweetToTags={tweetToTags}
-          selectedTweetIds={selectedTweetIds}
           selectedTags={selectedTags}
+          associatedTags={associatedTags}
           keyword={keyword}
           filterMethod={filterMethod}
           onlyUnrelated={onlyUnrelated}
-          setTweetToTags={setTweetToTags}
           setSelectedTags={setSelectedTags}
           setKeyword={setKeyword}
           setFilterMethod={setFilterMethod}
           setOnlyUnrelated={setOnlyUnrelated}
           setSelectedTweetIds={setSelectedTweetIds}
+          inSwitchAssociation={inSwitchAssociation}
         />
       </SideNavWrapper>
       <Main>
@@ -200,14 +219,17 @@ const Home = () => {
           originalTweets={originalTweets}
           deletedTweetIds={deletedTweetIds}
           tweetToTags={tweetToTags}
+          works={works}
           keyword={keyword}
           displayOptions={displayOptions}
           filterMethod={filterMethod}
           selectedTweetIds={selectedTweetIds}
           selectedTags={selectedTags}
+          associatedTags={associatedTags}
           onlyUnrelated={onlyUnrelated}
           isShiftKeyPressed={isShiftKeyPressed}
           setSelectedTweetIds={setSelectedTweetIds}
+          inSwitchAssociation={inSwitchAssociation}
         />
       </Main>
       <TweetWrapper>

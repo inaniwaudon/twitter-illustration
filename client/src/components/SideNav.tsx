@@ -10,6 +10,7 @@ import {
   getCharacterTag,
   getUniqueCommonTag,
   splitCharacterTag,
+  switchAssociation,
   FilterMethod,
 } from "@/utils/utils";
 
@@ -113,51 +114,37 @@ interface SideNavProps {
   works: Work[];
   commonTags: string[];
   tagHues: { [key in string]: number };
-  tweetToTags: TweetToTag;
-  selectedTweetIds: string[];
   selectedTags: string[];
+  associatedTags: string[];
   keyword: string;
   filterMethod: FilterMethod;
   onlyUnrelated: boolean;
-  setTweetToTags: (value: TweetToTag) => void;
   setSelectedTags: (value: string[]) => void;
   setKeyword: (value: string) => void;
   setFilterMethod: (value: FilterMethod) => void;
   setOnlyUnrelated: (value: boolean) => void;
   setSelectedTweetIds: (value: string[]) => void;
+  inSwitchAssociation: (tag: string) => void;
 }
 
 const SideNav = ({
   works,
   commonTags,
   tagHues,
-  tweetToTags,
-  selectedTweetIds,
   selectedTags,
+  associatedTags,
   keyword,
   filterMethod,
   onlyUnrelated,
-  setTweetToTags,
   setSelectedTags,
   setKeyword,
   setFilterMethod,
   setOnlyUnrelated,
   setSelectedTweetIds,
+  inSwitchAssociation,
 }: SideNavProps) => {
   const [_, setSearchParams] = useSearchParams();
   const allTags = getAllTags(works, commonTags);
-
-  const associatedTags = useMemo(() => {
-    if (
-      selectedTweetIds.length === 0 ||
-      !selectedTweetIds.every((id) => id in tweetToTags)
-    ) {
-      return [];
-    }
-    return allTags.filter((tag) =>
-      selectedTweetIds.every((id) => tweetToTags[id].includes(tag))
-    );
-  }, [allTags, selectedTweetIds, tweetToTags]);
 
   const updateParams = ({
     newFilterMethod,
@@ -205,32 +192,6 @@ const SideNav = ({
     setFilterMethod(method);
     updateParams({ newFilterMethod: method });
     setSelectedTweetIds([]);
-  };
-
-  const switchAssociation = (tag: string) => {
-    const alreadyExsits = associatedTags.includes(tag);
-
-    // update the data
-    if (alreadyExsits) {
-      deleteTweetTag(selectedTweetIds, [tag]);
-    } else {
-      addTweetTag(selectedTweetIds, [tag]);
-    }
-
-    // display
-    const newTweetToTags: TweetToTag = {
-      ...selectedTweetIds.reduce(
-        (previous, id) => ({ ...previous, [id]: [] }),
-        {}
-      ),
-      ...tweetToTags,
-    };
-    for (const id of selectedTweetIds) {
-      newTweetToTags[id] = alreadyExsits
-        ? newTweetToTags[id].filter((inTag) => inTag !== tag)
-        : [...newTweetToTags[id], tag];
-    }
-    setTweetToTags(newTweetToTags);
   };
 
   const clear = () => {
@@ -289,9 +250,9 @@ const SideNav = ({
                         selected={selectedTags.includes(tag)}
                         tweetAssociated={associatedTags.includes(tag)}
                         hue={tagHues[tag]}
-                        label={character}
+                        label={character.name}
                         onClickBody={() => switchSelect(tag)}
-                        onClickPlus={() => switchAssociation(tag)}
+                        onClickPlus={() => inSwitchAssociation(tag)}
                         key={tag}
                       />
                     );
@@ -312,7 +273,7 @@ const SideNav = ({
                   hue={0}
                   label={tag}
                   onClickBody={() => switchSelect(uniqueTag)}
-                  onClickPlus={() => switchAssociation(uniqueTag)}
+                  onClickPlus={() => inSwitchAssociation(uniqueTag)}
                   key={tag}
                 />
               );

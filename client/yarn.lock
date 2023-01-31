@@ -2302,6 +2302,11 @@ globals@^11.1.0:
   resolved "https://registry.yarnpkg.com/globals/-/globals-11.12.0.tgz#ab8795338868a0babd8525758018c2a7eb95c42e"
   integrity sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA==
 
+good-friends-colors@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/good-friends-colors/-/good-friends-colors-1.0.0.tgz#4bce6d4287e52144888f47cc054d65a156cfa912"
+  integrity sha512-v3RjtyD3yF+gxxmqAjB9AzQqzMbME6a7iH6Ubp9QrMsgvORWTfTW0lDXlAKEZQu7fsF90Yoz9PS8SUYgSwO+tg==
+
 graceful-fs@^4.1.2, graceful-fs@^4.2.4, graceful-fs@^4.2.6, graceful-fs@^4.2.9:
   version "4.2.10"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.10.tgz#147d3a006da4ca3ce14728c7aefc287c367d7a6c"
