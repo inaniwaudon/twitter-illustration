@@ -1,6 +1,7 @@
 import React from "react";
 import { IoPricetag } from "react-icons/io5";
 import styled from "styled-components";
+import gf from "good-friends-colors";
 import { defaultBoxShadow } from "@/const/styles";
 import { Work } from "@/utils/api";
 import {
@@ -123,8 +124,22 @@ export const ColorTags = ({
   associatedTags,
   inSwitchAssociation,
 }: ColorTagsProps) => {
-  const hue = rgbToHsl(color)[0];
-  const maxDiff = 20;
+  const hsl = rgbToHsl(color);
+  const maxDiff = 10;
+  const gfInstance = gf({ r: color[0], g: color[1], b: color[2] });
+
+  const getColorDiff = (hex: string) => {
+    const rgb = hexToRgb(hex);
+    const targetHsl = rgbToHsl(rgb);
+
+    const ciede2000 =
+      gfInstance.diff({ r: rgb[0], g: rgb[1], b: rgb[2] }) * 0.5;
+    const hslDiff =
+      Math.abs(targetHsl[0] - hsl[0]) *
+      (Math.abs(targetHsl[1] - hsl[1]) + 0.8) *
+      (Math.abs(targetHsl[2] - hsl[2]) + 0.8);
+    return Math.min(ciede2000, hslDiff);
+  };
 
   const filteredWorks = works
     .map((work) => ({
@@ -133,9 +148,9 @@ export const ColorTags = ({
         .map((character) => ({
           ...character,
           diff: Math.min(
-            ...(character.color ? character.color : []).map((color) =>
-              Math.abs(rgbToHsl(hexToRgb(color))[0] - hue)
-            ),
+            ...(character.color ? character.color : []).map((color) => {
+              return getColorDiff(color);
+            }),
             360
           ),
         }))
