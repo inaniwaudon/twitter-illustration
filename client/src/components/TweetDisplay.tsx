@@ -60,6 +60,7 @@ const TweetDisplay = ({ selectedTweet, setKeyword }: TweetDisplayProps) => {
     : "";
 
   const date = new Date(selectedTweet.tweetCreatedAt);
+  console.log(selectedTweet.tweetCreatedAt, date);
   const hours =
     date.getHours() > 12
       ? "午後" + (date.getHours() - 12)
@@ -67,7 +68,7 @@ const TweetDisplay = ({ selectedTweet, setKeyword }: TweetDisplayProps) => {
   const minutes = ("0" + date.getMinutes()).slice(-2);
   const dateStr = `${hours}:${minutes}・${date.getFullYear()}年${
     date.getMonth() + 1
-  }月${date.getDay()}日`;
+  }月${date.getDate()}日`;
 
   const body = (
     <>
