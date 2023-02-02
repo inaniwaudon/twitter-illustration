@@ -105,13 +105,13 @@ const IllustList = ({
 
   const splitedTweets = useMemo(() => {
     const array: Tweet[][] = [];
-    const n = 100;
+    const n = displayOptions.tweetsPerPage;
     for (let i = 0; i < Math.ceil(filteredTweets.length / n); i++) {
       array.push(filteredTweets.slice(i * n, (i + 1) * n));
     }
     console.log(array);
     return array;
-  }, [filteredTweets]);
+  }, [filteredTweets, displayOptions.tweetsPerPage]);
 
   return (
     <>
