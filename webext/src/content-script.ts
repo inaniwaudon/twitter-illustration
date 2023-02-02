@@ -14,6 +14,44 @@ const removeAllButtons = () => {
   }
 };
 
+const parseHTML = (tweet: Element, tweetPhotos: NodeListOf<Element>) => {
+  const imgSrcs: string[] = [];
+  let bodyText: string | null = null;
+  let userName: string | null = null;
+  let userScreenName: string | null = null;
+
+  // get images
+  for (let i = 0; i < tweetPhotos.length; i++) {
+    if (tweetPhotos[i]) {
+      const img = tweetPhotos[i].querySelector('img');
+      if (img && img.src) {
+        imgSrcs.push(img.src);
+      }
+    }
+  }
+  // get a body
+  const tweetText = tweet.querySelector('[data-testid="tweetText"]');
+  if (tweetText) {
+    bodyText = '';
+    for (let i = 0; i < tweetText.childNodes.length; i++) {
+      const node = tweetText.childNodes[i];
+      if (node instanceof HTMLElement) {
+        if (node.tagName.toLowerCase() === 'img' && node.hasAttribute('alt')) {
+          bodyText += node.getAttribute('alt');
+        } else {
+          bodyText += node.textContent;
+        }
+      }
+    }
+  }
+  // get user information
+  const userNames = tweet.querySelector('[data-testid="User-Names"]');
+  userName = userNames!.childNodes[0].textContent;
+  userScreenName = userNames!.childNodes[1].textContent;
+
+  return { imgSrcs, bodyText, userName, userScreenName };
+};
+
 const callback = () => {
   // target a tweet page containing images
   const url = location.href;
@@ -29,47 +67,7 @@ const callback = () => {
     removeAllButtons();
     return;
   }
-
-  const imgSrcs: string[] = [];
-  let bodyText: string | null = null;
-  let userName: string | null = null;
-  let userScreenName: string | null = null;
-
-  if (!usesApi) {
-    // get images
-    for (let i = 0; i < tweetPhotos.length; i++) {
-      if (tweetPhotos[i]) {
-        const img = tweetPhotos[i].querySelector('img');
-        if (img && img.src) {
-          imgSrcs.push(img.src);
-        }
-      }
-    }
-
-    // get a body
-    const tweetText = tweet.querySelector('[data-testid="tweetText"]');
-    if (tweetText) {
-      bodyText = '';
-      for (let i = 0; i < tweetText.childNodes.length; i++) {
-        const node = tweetText.childNodes[i];
-        if (node instanceof HTMLElement) {
-          if (
-            node.tagName.toLowerCase() === 'img' &&
-            node.hasAttribute('alt')
-          ) {
-            bodyText += node.getAttribute('alt');
-          } else {
-            bodyText += node.textContent;
-          }
-        }
-      }
-    }
-
-    // get user information
-    const userNames = tweet.querySelector('[data-testid="User-Names"]');
-    userName = userNames!.childNodes[0].textContent;
-    userScreenName = userNames!.childNodes[1].textContent;
-  }
+  const parsed = usesApi ? parseHTML(tweet, tweetPhotos) : null;
 
   // add a plus button
   const navigationQuery =
