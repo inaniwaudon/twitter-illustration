@@ -1,9 +1,8 @@
 import { sendMessage } from './request';
 
-let registeredTweets: string[] = [];
-
 const usesApi = false;
 
+let registeredTweets: string[] = [];
 const plusButtonClassName = 'illustration-plus';
 
 const removeAllButtons = () => {
@@ -14,16 +13,16 @@ const removeAllButtons = () => {
   }
 };
 
-const parseHTML = (tweet: Element, tweetPhotos: NodeListOf<Element>) => {
+const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
   const imgSrcs: string[] = [];
   let bodyText: string | null = null;
   let userName: string | null = null;
-  let userScreenName: string | null = null;
+  let screenName: string | null = null;
 
   // get images
-  for (let i = 0; i < tweetPhotos.length; i++) {
-    if (tweetPhotos[i]) {
-      const img = tweetPhotos[i].querySelector('img');
+  for (const tweetPhoto of tweetPhotos) {
+    if (tweetPhoto) {
+      const img = tweetPhoto.querySelector('img');
       if (img && img.src) {
         imgSrcs.push(img.src);
       }
@@ -47,9 +46,11 @@ const parseHTML = (tweet: Element, tweetPhotos: NodeListOf<Element>) => {
   // get user information
   const userNames = tweet.querySelector('[data-testid="User-Names"]');
   userName = userNames!.childNodes[0].textContent;
-  userScreenName = userNames!.childNodes[1].textContent;
+  screenName = userNames!.childNodes[1].textContent;
 
-  return { imgSrcs, bodyText, userName, userScreenName };
+  return imgSrcs.length > 0 && bodyText && userName && screenName
+    ? { imgSrcs, bodyText, userName, screenName }
+    : null;
 };
 
 const callback = () => {
@@ -60,14 +61,23 @@ const callback = () => {
     removeAllButtons();
     return;
   }
-  const tweetPhotos = tweet.querySelectorAll(
-    '[data-testid="tweetPhoto"], [data-testid="swipe-to-dismiss"]'
-  );
+  const tweetPhotos = [
+    ...Array.from(tweet.querySelectorAll('[data-testid="tweetPhoto"]')),
+    ...Array.from(
+      document.querySelectorAll('[data-testid="swipe-to-dismiss"]')
+    ),
+  ];
+
   if (!url.includes('/status') || tweetPhotos.length === 0) {
     removeAllButtons();
     return;
   }
-  const parsed = usesApi ? parseHTML(tweet, tweetPhotos) : null;
+  const parsed = !usesApi ? parseHTML(tweet, tweetPhotos) : null;
+  if (!usesApi && !parsed) {
+    removeAllButtons();
+    console.error('Parsing is failed.');
+    return;
+  }
 
   // add a plus button
   const navigationQuery =
@@ -91,10 +101,17 @@ const callback = () => {
 
     if (!isAlreadyStored) {
       const onClickPlusButton = async () => {
-        const response = await sendMessage({
-          type: 'add-tweet',
-          body: { id },
-        });
+        const response = await sendMessage(
+          usesApi
+            ? {
+                type: 'add-tweet',
+                body: { id },
+              }
+            : {
+                type: 'add-parsed-tweet',
+                body: { id, ...parsed },
+              }
+        );
         if (response.succeeded) {
           registeredTweets.push(id);
           plusButton.innerHTML = '✓';

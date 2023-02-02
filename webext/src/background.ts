@@ -40,6 +40,30 @@ browser.runtime.onMessage.addListener(
         }
       }
 
+      // add a parsed tweet
+      if (
+        message.type === 'add-parsed-tweet' &&
+        'body' in message &&
+        ['id', 'imgSrcs', 'bodyText', 'userName', 'screenName'].every(
+          (field) => field in message.body
+        )
+      ) {
+        try {
+          const response = await fetch(`${BACKEND_URL}/parsed-tweet`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message.body.id),
+          });
+          return response.ok
+            ? { succeeded: true, message: 'Added a tweet.' }
+            : generateErrorMessage('serverError');
+        } catch {
+          return generateErrorMessage('networkError');
+        }
+      }
+
       // get the stored tweet list
       if (message.type === 'get-tweets') {
         try {

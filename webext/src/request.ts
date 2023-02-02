@@ -7,7 +7,7 @@ export interface MessageResponse {
 }
 
 export interface MessageRequest {
-  type: 'add-tweet' | 'get-tweets';
+  type: 'add-tweet' | 'add-parsed-tweet' | 'get-tweets';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: any;
 }
