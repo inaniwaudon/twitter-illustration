@@ -1,14 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import ColorTags from "./ColorTags";
-import { getImageEndpoint, Tweet, TweetToTag, Work } from "@/utils/api";
-import {
-  getImagePixel,
-  loadImage,
-  Color,
-  DisplayOptions,
-  FilterMethod,
-} from "@/utils/utils";
+import { Tweet, TweetToTag, Work } from "@/utils/api";
+import { Color, DisplayOptions, FilterMethod } from "@/utils/utils";
 import IllustGroup from "./IllustGroup";
 
 const Wrapper = styled.div`
@@ -119,63 +113,21 @@ const IllustList = ({
     return array;
   }, [filteredTweets]);
 
-  /*const onClickTweet = async (e: React.MouseEvent, id: string) => {
-    if (e.ctrlKey || e.metaKey) {
-      const rect = e.currentTarget.getBoundingClientRect();
-
-      // get color
-      const img = new Image();
-      img.src = getImageEndpoint(id, 0);
-      await loadImage(img);
-
-      let x = e.clientX - rect.x;
-      let y = e.clientY - rect.y;
-      if (displayOptions.isSquare) {
-        if (img.naturalWidth > img.naturalHeight) {
-          x += ((img.naturalWidth / img.naturalHeight - 1.0) * rect.height) / 2;
-        } else {
-          y += ((img.naturalHeight / img.naturalWidth - 1.0) * rect.width) / 2;
-        }
-      }
-
-      const pixel = await getImagePixel(
-        img,
-        x / rect.width,
-        y / ((img.height / img.width) * rect.width),
-        rect.width
-      );
-
-      setPixelColor(pixel);
-      setMousePoint([e.clientX, e.clientY]);
-      if (selectedTweetIds.length === 0) {
-        setSelectedTweetIds([id]);
-      }
-    } else {
-      if (!pixelColor || !mousePoint) {
-        setSelectedTweetIds(
-          isShiftKeyPressed
-            ? selectedTweetIds.includes(id)
-              ? selectedTweetIds.filter((inId) => inId !== id)
-              : [...selectedTweetIds, id]
-            : selectedTweetIds.includes(id)
-            ? []
-            : [id]
-        );
-      }
-      setPixelColor(undefined);
-      setMousePoint(undefined);
-    }
-  };*/
-
   return (
     <>
       <Wrapper>
         {splitedTweets.map((tweets, index) => (
           <IllustGroup
+            isShiftKeyPressed={isShiftKeyPressed}
+            pixelColor={pixelColor}
+            mousePoint={mousePoint}
             selectedTweetIds={selectedTweetIds}
             tweets={tweets}
             displayOptions={displayOptions}
             key={index}
+            setPixelColor={setPixelColor}
+            setMousePoint={setMousePoint}
+            setSelectedTweetIds={setSelectedTweetIds}
           />
         ))}
       </Wrapper>
