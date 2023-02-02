@@ -95,6 +95,7 @@ const Home = () => {
   const [displayOptions, _setDisplayOptions] = useState<DisplayOptions>({
     isSquare: false,
     columns: 3,
+    tweetsPerPage: 100,
   });
   const [isShiftKeyPressed, setShiftKeyPressed] = useState(false);
 

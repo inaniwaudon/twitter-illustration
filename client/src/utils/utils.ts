@@ -14,6 +14,7 @@ export type FilterMethod = "and" | "or";
 export interface DisplayOptions {
   isSquare: boolean;
   columns: number;
+  tweetsPerPage: number;
 }
 
 // tag
