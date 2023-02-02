@@ -5,8 +5,7 @@ import { addParsedTweet } from "../tweet";
 const router = express.Router();
 
 // endpoint
-const tweetEndpoint = "/tweet";
-const tweetTagEndpoint = "/tweet-tag";
+const parsedTweetEndpoint = "/parsed-tweet";
 
 // request
 interface ParsedTweetPostRequest extends express.Request {
@@ -21,7 +20,7 @@ interface ParsedTweetPostRequest extends express.Request {
 }
 
 router.post(
-  tweetEndpoint,
+  parsedTweetEndpoint,
   async (req: ParsedTweetPostRequest, res: express.Response) => {
     try {
       if (
@@ -44,6 +43,7 @@ router.post(
         req.body.userName
       );
     } catch (e) {
+      console.log(e);
       if (e instanceof CustomError) {
         res.status(e.status).send(e.message);
         return;

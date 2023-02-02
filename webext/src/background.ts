@@ -44,9 +44,14 @@ browser.runtime.onMessage.addListener(
       if (
         message.type === 'add-parsed-tweet' &&
         'body' in message &&
-        ['id', 'imgSrcs', 'bodyText', 'userName', 'screenName'].every(
-          (field) => field in message.body
-        )
+        [
+          'tweetId',
+          'tweetBody',
+          'tweetCreatedAt',
+          'imgSrcs',
+          'screenName',
+          'userName',
+        ].every((field) => field in message.body)
       ) {
         try {
           const response = await fetch(`${BACKEND_URL}/parsed-tweet`, {
@@ -54,7 +59,7 @@ browser.runtime.onMessage.addListener(
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(message.body.id),
+            body: JSON.stringify(message.body),
           });
           return response.ok
             ? { succeeded: true, message: 'Added a tweet.' }

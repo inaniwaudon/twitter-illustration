@@ -15,9 +15,10 @@ const removeAllButtons = () => {
 
 const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
   const imgSrcs: string[] = [];
-  let bodyText: string | null = null;
-  let userName: string | null = null;
+  let tweetBody: string | null = null;
+  let tweetCreatedAt: string | null = null;
   let screenName: string | null = null;
+  let userName: string | null = null;
 
   // get images
   for (const tweetPhoto of tweetPhotos) {
@@ -31,25 +32,35 @@ const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
   // get a body
   const tweetText = tweet.querySelector('[data-testid="tweetText"]');
   if (tweetText) {
-    bodyText = '';
+    tweetBody = '';
     for (let i = 0; i < tweetText.childNodes.length; i++) {
       const node = tweetText.childNodes[i];
       if (node instanceof HTMLElement) {
         if (node.tagName.toLowerCase() === 'img' && node.hasAttribute('alt')) {
-          bodyText += node.getAttribute('alt');
+          tweetBody += node.getAttribute('alt');
         } else {
-          bodyText += node.textContent;
+          tweetBody += node.textContent;
         }
       }
     }
   }
+  // get a timestamp
+  const time = tweet.querySelector('time');
+  if (time) {
+    tweetCreatedAt = time.dateTime;
+  }
+
   // get user information
   const userNames = tweet.querySelector('[data-testid="User-Names"]');
   userName = userNames!.childNodes[0].textContent;
   screenName = userNames!.childNodes[1].textContent;
 
-  return imgSrcs.length > 0 && bodyText && userName && screenName
-    ? { imgSrcs, bodyText, userName, screenName }
+  return imgSrcs.length > 0 &&
+    tweetBody &&
+    tweetCreatedAt &&
+    screenName &&
+    userName
+    ? { tweetBody, tweetCreatedAt, imgSrcs, screenName, userName }
     : null;
 };
 
@@ -109,7 +120,7 @@ const callback = () => {
               }
             : {
                 type: 'add-parsed-tweet',
-                body: { id, ...parsed },
+                body: { tweetId: id, ...parsed },
               }
         );
         if (response.succeeded) {

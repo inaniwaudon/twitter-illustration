@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import sizeOf from "image-size";
 import { Client } from "twitter-api-sdk";
+import { URL } from "url";
 import { CustomError } from "./error";
 import db from "../models/index";
 import { string } from "yargs";
@@ -23,11 +24,16 @@ interface ImageRecord {
   height: number;
 }
 
+// image
 const getImagesBuffers = async (srcs: string[]) => {
   const imageBuffers: Buffer[] = [];
   try {
     for (const src of srcs) {
-      const response = await fetch(src);
+      const parsedUrl = new URL(src);
+      parsedUrl.searchParams.set("name", "orig");
+      const originalSrc = parsedUrl.toString();
+
+      const response = await fetch(originalSrc);
       const arrayBuffer = await response.arrayBuffer();
       imageBuffers.push(Buffer.from(arrayBuffer));
     }
@@ -36,6 +42,17 @@ const getImagesBuffers = async (srcs: string[]) => {
     throw new CustomError(500, "Cannot fetch images.");
   }
   return imageBuffers;
+};
+
+const uploadImages = (tweetId: string, buffers: Buffer[]) => {
+  try {
+    for (let i = 0; i < buffers.length; i++) {
+      fs.writeFileSync(`./images/${tweetId}_${i}.jpeg`, buffers[i]);
+    }
+  } catch (e) {
+    console.log(e);
+    throw new CustomError(500, "Cannot upload images.");
+  }
 };
 
 export const addTweet = async (id: string) => {
@@ -78,14 +95,7 @@ export const addTweet = async (id: string) => {
 
   // upload images
   const imageBuffers = await getImagesBuffers(images.map((img) => img.url));
-  try {
-    for (let i = 0; i < images.length; i++) {
-      fs.writeFileSync(`./images/${tweet.data.id}_${i}.jpeg`, imageBuffers[i]);
-    }
-  } catch (e) {
-    console.log(e);
-    throw new CustomError(500, "Cannot upload images.");
-  }
+  uploadImages(tweet.data.id, imageBuffers);
 
   const transaction = await db.sequelize.transaction();
   try {
@@ -136,8 +146,8 @@ export const addParsedTweet = async (
   tweetBody: string,
   tweetCreatedAt: string,
   imgSrcs: string[],
-  userName: string,
-  screenName: string
+  screenName: string,
+  userName: string
 ) => {
   // get images
   const imageBuffers = await getImagesBuffers(imgSrcs);
@@ -147,7 +157,9 @@ export const addParsedTweet = async (
   } catch {
     throw new CustomError(500, "Failed to process images.");
   }
+  uploadImages(tweetId, imageBuffers);
 
+  screenName = screenName.replace("@", "");
   const screenNameAsId = screenNamePrefix + screenName;
   const transaction = await db.sequelize.transaction();
   try {
