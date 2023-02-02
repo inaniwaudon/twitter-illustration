@@ -1,6 +1,6 @@
 import { sendMessage } from './request';
 
-const usesApi = false;
+const usesApi = process.env.USE_API == 'true';
 
 let registeredTweets: string[] = [];
 const plusButtonClassName = 'illustration-plus';
