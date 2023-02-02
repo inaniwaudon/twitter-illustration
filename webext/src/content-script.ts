@@ -1,23 +1,92 @@
 import { sendMessage } from './request';
 
+const usesApi = process.env.USE_API == 'true';
+
 let registeredTweets: string[] = [];
+const plusButtonClassName = 'illustration-plus';
+
+const removeAllButtons = () => {
+  const existingPlusButtons =
+    document.getElementsByClassName(plusButtonClassName);
+  for (let i = 0; i < existingPlusButtons.length; i++) {
+    existingPlusButtons[i].remove();
+  }
+};
+
+const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
+  const imgSrcs: string[] = [];
+  let tweetBody: string | null = null;
+  let tweetCreatedAt: string | null = null;
+  let screenName: string | null = null;
+  let userName: string | null = null;
+
+  // get images
+  for (const tweetPhoto of tweetPhotos) {
+    if (tweetPhoto) {
+      const img = tweetPhoto.querySelector('img');
+      if (img && img.src) {
+        imgSrcs.push(img.src);
+      }
+    }
+  }
+  // get a body
+  const tweetText = tweet.querySelector('[data-testid="tweetText"]');
+  if (tweetText) {
+    tweetBody = '';
+    for (let i = 0; i < tweetText.childNodes.length; i++) {
+      const node = tweetText.childNodes[i];
+      if (node instanceof HTMLElement) {
+        if (node.tagName.toLowerCase() === 'img' && node.hasAttribute('alt')) {
+          tweetBody += node.getAttribute('alt');
+        } else {
+          tweetBody += node.textContent;
+        }
+      }
+    }
+  }
+  // get a timestamp
+  const time = tweet.querySelector('time');
+  if (time) {
+    tweetCreatedAt = time.dateTime;
+  }
+
+  // get user information
+  const userNames = tweet.querySelector('[data-testid="User-Names"]');
+  userName = userNames!.childNodes[0].textContent;
+  screenName = userNames!.childNodes[1].textContent;
+
+  return imgSrcs.length > 0 &&
+    tweetBody &&
+    tweetCreatedAt &&
+    screenName &&
+    userName
+    ? { tweetBody, tweetCreatedAt, imgSrcs, screenName, userName }
+    : null;
+};
 
 const callback = () => {
-  const plusButtonClassName = 'illustration-plus';
-
   // target a tweet page containing images
   const url = location.href;
-  if (
-    !url.includes('/status') ||
-    !document.querySelector(
-      '[data-testid="tweetPhoto"], [data-testid="swipe-to-dismiss"]'
-    )
-  ) {
-    const existingPlusButtons =
-      document.getElementsByClassName(plusButtonClassName);
-    for (let i = 0; i < existingPlusButtons.length; i++) {
-      existingPlusButtons[i].remove();
-    }
+  const tweet = document.querySelector('article[tabindex="-1"]');
+  if (!tweet) {
+    removeAllButtons();
+    return;
+  }
+  const tweetPhotos = [
+    ...Array.from(tweet.querySelectorAll('[data-testid="tweetPhoto"]')),
+    ...Array.from(
+      document.querySelectorAll('[data-testid="swipe-to-dismiss"]')
+    ),
+  ];
+
+  if (!url.includes('/status') || tweetPhotos.length === 0) {
+    removeAllButtons();
+    return;
+  }
+  const parsed = !usesApi ? parseHTML(tweet, tweetPhotos) : null;
+  if (!usesApi && !parsed) {
+    removeAllButtons();
+    console.error('Parsing is failed.');
     return;
   }
 
@@ -43,10 +112,17 @@ const callback = () => {
 
     if (!isAlreadyStored) {
       const onClickPlusButton = async () => {
-        const response = await sendMessage({
-          type: 'add-tweet',
-          body: { id },
-        });
+        const response = await sendMessage(
+          usesApi
+            ? {
+                type: 'add-tweet',
+                body: { id },
+              }
+            : {
+                type: 'add-parsed-tweet',
+                body: { tweetId: id, ...parsed },
+              }
+        );
         if (response.succeeded) {
           registeredTweets.push(id);
           plusButton.innerHTML = '✓';
@@ -58,7 +134,6 @@ const callback = () => {
       plusButton.addEventListener('click', onClickPlusButton);
     }
     navigations[i].appendChild(plusButton);
-    console.log(navigations[i]);
   }
 };
 

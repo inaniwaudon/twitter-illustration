@@ -56,6 +56,7 @@ router.get(
       try {
         res.json(await getTweetIds());
       } catch (e) {
+        console.log(e);
         if (e instanceof CustomError) {
           res.status(e.status).send(e.message);
         } else {
@@ -72,6 +73,7 @@ router.post(
     try {
       await Promise.all(req.body.ids.map((id) => addTweet(id)));
     } catch (e) {
+      console.log(e);
       if (e instanceof CustomError) {
         res.status(e.status).send(e.message);
         return;
@@ -112,7 +114,8 @@ router.get(
           attributes: ["tweetId", "tag"],
         })
       );
-    } catch {
+    } catch (e) {
+      console.log(e);
       res.status(500).send("Server error.");
     }
   }
@@ -127,7 +130,8 @@ router.post(
       );
       await db.tweetTag.bulkCreate(records, { ignoreDuplicates: true });
       res.status(204).send();
-    } catch {
+    } catch (e) {
+      console.log(e);
       res.status(500).send("Server error.");
     }
   }
@@ -146,7 +150,8 @@ router.delete(
         },
       });
       res.status(204).send();
-    } catch {
+    } catch (e) {
+      console.log(e);
       res.status(500).send("Server error.");
     }
   }

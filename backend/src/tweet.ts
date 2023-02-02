@@ -1,8 +1,11 @@
 import dotenv from "dotenv";
 import fs from "fs";
+import sizeOf from "image-size";
 import { Client } from "twitter-api-sdk";
+import { URL } from "url";
 import { CustomError } from "./error";
 import db from "../models/index";
+import { string } from "yargs";
 
 dotenv.config();
 const client = new Client(process.env.TWITTER_BEARER_TOKEN);
@@ -20,6 +23,37 @@ interface ImageRecord {
   width: number;
   height: number;
 }
+
+// image
+const getImagesBuffers = async (srcs: string[]) => {
+  const imageBuffers: Buffer[] = [];
+  try {
+    for (const src of srcs) {
+      const parsedUrl = new URL(src);
+      parsedUrl.searchParams.set("name", "orig");
+      const originalSrc = parsedUrl.toString();
+
+      const response = await fetch(originalSrc);
+      const arrayBuffer = await response.arrayBuffer();
+      imageBuffers.push(Buffer.from(arrayBuffer));
+    }
+  } catch (e) {
+    console.log(e);
+    throw new CustomError(500, "Cannot fetch images.");
+  }
+  return imageBuffers;
+};
+
+const uploadImages = (tweetId: string, buffers: Buffer[]) => {
+  try {
+    for (let i = 0; i < buffers.length; i++) {
+      fs.writeFileSync(`./images/${tweetId}_${i}.jpeg`, buffers[i]);
+    }
+  } catch (e) {
+    console.log(e);
+    throw new CustomError(500, "Cannot upload images.");
+  }
+};
 
 export const addTweet = async (id: string) => {
   // get a tweet
@@ -59,28 +93,9 @@ export const addTweet = async (id: string) => {
     throw new CustomError(500, "No image exists.");
   }
 
-  // get images
-  const imageBuffers = [];
-  try {
-    for (let i = 0; i < images.length; i++) {
-      const response = await fetch(images[i].url);
-      const arrayBuffer = await response.arrayBuffer();
-      imageBuffers.push(Buffer.from(arrayBuffer));
-    }
-  } catch (e) {
-    console.log(e);
-    throw new CustomError(500, "Cannot fetch images.");
-  }
-
   // upload images
-  try {
-    for (let i = 0; i < images.length; i++) {
-      fs.writeFileSync(`./images/${tweet.data.id}_${i}.jpeg`, imageBuffers[i]);
-    }
-  } catch (e) {
-    console.log(e);
-    throw new CustomError(500, "Cannot upload images.");
-  }
+  const imageBuffers = await getImagesBuffers(images.map((img) => img.url));
+  uploadImages(tweet.data.id, imageBuffers);
 
   const transaction = await db.sequelize.transaction();
   try {
@@ -111,6 +126,70 @@ export const addTweet = async (id: string) => {
       index,
       width: images[index].width,
       height: images[index].height,
+    }));
+    await db.image.bulkCreate(image_records, {
+      ignoreDuplicates: true,
+      transaction,
+    });
+    await transaction.commit();
+  } catch (e) {
+    await transaction.rollback();
+    console.log(e);
+    throw new CustomError(500, "DB error.");
+  }
+};
+
+const screenNamePrefix = "screen:";
+
+export const addParsedTweet = async (
+  tweetId: string,
+  tweetBody: string,
+  tweetCreatedAt: string,
+  imgSrcs: string[],
+  screenName: string,
+  userName: string
+) => {
+  // get images
+  const imageBuffers = await getImagesBuffers(imgSrcs);
+  let imageSizes: { width: number; height: number }[] = [];
+  try {
+    imageSizes = imageBuffers.map((buffer) => sizeOf(buffer));
+  } catch {
+    throw new CustomError(500, "Failed to process images.");
+  }
+  uploadImages(tweetId, imageBuffers);
+
+  screenName = screenName.replace("@", "");
+  const screenNameAsId = screenNamePrefix + screenName;
+  const transaction = await db.sequelize.transaction();
+  try {
+    // insert or update a user
+    await db.user.upsert(
+      {
+        id: screenNameAsId,
+        screenName,
+        name: userName,
+      },
+      { transaction }
+    );
+
+    // insert or update a tweet
+    await db.tweet.upsert(
+      {
+        id: tweetId,
+        body: tweetBody,
+        userId: screenNameAsId,
+        tweetCreatedAt: tweetCreatedAt,
+      },
+      { transaction }
+    );
+
+    // insert images
+    const image_records: ImageRecord[] = imageBuffers.map((_, index) => ({
+      tweetId: tweetId,
+      index,
+      width: imageSizes[index].width,
+      height: imageSizes[index].height,
     }));
     await db.image.bulkCreate(image_records, {
       ignoreDuplicates: true,
