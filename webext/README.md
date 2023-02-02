@@ -1,4 +1,4 @@
-# twitter-illustration/chrome-exetnsion
+# twitter-illustration/webext
 
 ## Development
 
