@@ -2,23 +2,73 @@ import { sendMessage } from './request';
 
 let registeredTweets: string[] = [];
 
-const callback = () => {
-  const plusButtonClassName = 'illustration-plus';
+const usesApi = false;
 
+const plusButtonClassName = 'illustration-plus';
+
+const removeAllButtons = () => {
+  const existingPlusButtons =
+    document.getElementsByClassName(plusButtonClassName);
+  for (let i = 0; i < existingPlusButtons.length; i++) {
+    existingPlusButtons[i].remove();
+  }
+};
+
+const callback = () => {
   // target a tweet page containing images
   const url = location.href;
-  if (
-    !url.includes('/status') ||
-    !document.querySelector(
-      '[data-testid="tweetPhoto"], [data-testid="swipe-to-dismiss"]'
-    )
-  ) {
-    const existingPlusButtons =
-      document.getElementsByClassName(plusButtonClassName);
-    for (let i = 0; i < existingPlusButtons.length; i++) {
-      existingPlusButtons[i].remove();
-    }
+  const tweet = document.querySelector('article[tabindex="-1"]');
+  if (!tweet) {
+    removeAllButtons();
     return;
+  }
+  const tweetPhotos = tweet.querySelectorAll(
+    '[data-testid="tweetPhoto"], [data-testid="swipe-to-dismiss"]'
+  );
+  if (!url.includes('/status') || tweetPhotos.length === 0) {
+    removeAllButtons();
+    return;
+  }
+
+  const imgSrcs: string[] = [];
+  let bodyText: string | null = null;
+  let userName: string | null = null;
+  let userScreenName: string | null = null;
+
+  if (!usesApi) {
+    // get images
+    for (let i = 0; i < tweetPhotos.length; i++) {
+      if (tweetPhotos[i]) {
+        const img = tweetPhotos[i].querySelector('img');
+        if (img && img.src) {
+          imgSrcs.push(img.src);
+        }
+      }
+    }
+
+    // get a body
+    const tweetText = tweet.querySelector('[data-testid="tweetText"]');
+    if (tweetText) {
+      bodyText = '';
+      for (let i = 0; i < tweetText.childNodes.length; i++) {
+        const node = tweetText.childNodes[i];
+        if (node instanceof HTMLElement) {
+          if (
+            node.tagName.toLowerCase() === 'img' &&
+            node.hasAttribute('alt')
+          ) {
+            bodyText += node.getAttribute('alt');
+          } else {
+            bodyText += node.textContent;
+          }
+        }
+      }
+    }
+
+    // get user information
+    const userNames = tweet.querySelector('[data-testid="User-Names"]');
+    userName = userNames!.childNodes[0].textContent;
+    userScreenName = userNames!.childNodes[1].textContent;
   }
 
   // add a plus button
@@ -58,7 +108,6 @@ const callback = () => {
       plusButton.addEventListener('click', onClickPlusButton);
     }
     navigations[i].appendChild(plusButton);
-    console.log(navigations[i]);
   }
 };
 
