@@ -5,7 +5,7 @@ const { DefinePlugin, EnvironmentPlugin } = require('webpack');
 const process = require('process');
 
 module.exports = () => {
-  const env = dotenv.config().parsed;
+  const env = dotenv.config().parsed || { USE_API: 'false' };
 
   return {
     mode: process.env.NODE_ENV || 'development',

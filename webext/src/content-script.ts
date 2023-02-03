@@ -15,7 +15,7 @@ const removeAllButtons = () => {
 
 const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
   const imgSrcs: string[] = [];
-  let tweetBody: string | null = null;
+  let tweetBody = '';
   let tweetCreatedAt: string | null = null;
   let screenName: string | null = null;
   let userName: string | null = null;
@@ -32,7 +32,6 @@ const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
   // get a body
   const tweetText = tweet.querySelector('[data-testid="tweetText"]');
   if (tweetText) {
-    tweetBody = '';
     for (let i = 0; i < tweetText.childNodes.length; i++) {
       const node = tweetText.childNodes[i];
       if (node instanceof HTMLElement) {
@@ -55,11 +54,7 @@ const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
   userName = userNames!.childNodes[0].textContent;
   screenName = userNames!.childNodes[1].textContent;
 
-  return imgSrcs.length > 0 &&
-    tweetBody &&
-    tweetCreatedAt &&
-    screenName &&
-    userName
+  return imgSrcs.length > 0 && tweetCreatedAt && screenName && userName
     ? { tweetBody, tweetCreatedAt, imgSrcs, screenName, userName }
     : null;
 };
