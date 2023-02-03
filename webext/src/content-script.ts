@@ -54,7 +54,6 @@ const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
   userName = userNames!.childNodes[0].textContent;
   screenName = userNames!.childNodes[1].textContent;
 
-  console.log(imgSrcs);
   return imgSrcs.length > 0 && tweetCreatedAt && screenName && userName
     ? { tweetBody, tweetCreatedAt, imgSrcs, screenName, userName }
     : null;
