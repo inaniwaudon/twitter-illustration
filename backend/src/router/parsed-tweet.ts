@@ -1,6 +1,7 @@
 import express from "express";
 import { CustomError } from "../error";
 import { addParsedTweet } from "../tweet";
+import { isString } from "../utils";
 
 const router = express.Router();
 
@@ -24,15 +25,16 @@ router.post(
   async (req: ParsedTweetPostRequest, res: express.Response) => {
     try {
       if (
-        !req.body.tweetId ||
-        !req.body.tweetBody ||
-        !req.body.tweetCreatedAt ||
-        !req.body.screenName ||
-        !req.body.userName ||
+        !isString(req.body.tweetId) ||
+        !isString(req.body.tweetBody) ||
+        !isString(req.body.tweetCreatedAt) ||
+        !isString(req.body.screenName) ||
+        !isString(req.body.userName) ||
         !req.body.imgSrcs ||
         req.body.imgSrcs.length === 0
       ) {
         res.status(400).send("Bad request.");
+        return;
       }
       await addParsedTweet(
         req.body.tweetId,
