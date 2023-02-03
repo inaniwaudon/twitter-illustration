@@ -54,6 +54,7 @@ const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
   userName = userNames!.childNodes[0].textContent;
   screenName = userNames!.childNodes[1].textContent;
 
+  console.log(imgSrcs);
   return imgSrcs.length > 0 && tweetCreatedAt && screenName && userName
     ? { tweetBody, tweetCreatedAt, imgSrcs, screenName, userName }
     : null;
@@ -81,7 +82,6 @@ const callback = () => {
   const parsed = !usesApi ? parseHTML(tweet, tweetPhotos) : null;
   if (!usesApi && !parsed) {
     removeAllButtons();
-    console.error('Parsing is failed.');
     return;
   }
 
@@ -96,37 +96,47 @@ const callback = () => {
   const id = url.replace(/^https:\/\/.*\/status\//, '').replace(/\/.*$/, '');
   const isAlreadyStored = registeredTweets.includes(id);
 
+  // event handler
+  const onClickPlusButton = async (button: HTMLDivElement) => {
+    const response = await sendMessage(
+      usesApi
+        ? {
+            type: 'add-tweet',
+            body: { id },
+          }
+        : {
+            type: 'add-parsed-tweet',
+            body: { tweetId: id, ...parsed },
+          }
+    );
+    if (response.succeeded) {
+      registeredTweets.push(id);
+      button.innerHTML = '✓';
+      button.onclick = null;
+    } else {
+      alert(`Failed: ${response.message}`);
+    }
+  };
+
   for (let i = 0; i < navigations.length; i++) {
-    if (navigations[i].getElementsByClassName(plusButtonClassName).length > 0) {
+    const existingPlusButtons = Array.from(
+      navigations[i].getElementsByClassName(plusButtonClassName)
+    ).flatMap((element) => (element instanceof HTMLDivElement ? element : []));
+
+    // when buttons already exist
+    if (existingPlusButtons.length > 0) {
+      for (const button of existingPlusButtons) {
+        button.onclick = () => onClickPlusButton(button);
+      }
       continue;
     }
 
+    // add a button
     const plusButton = document.createElement('div');
     plusButton.className = plusButtonClassName;
     plusButton.innerHTML = isAlreadyStored ? '✓' : '+';
-
     if (!isAlreadyStored) {
-      const onClickPlusButton = async () => {
-        const response = await sendMessage(
-          usesApi
-            ? {
-                type: 'add-tweet',
-                body: { id },
-              }
-            : {
-                type: 'add-parsed-tweet',
-                body: { tweetId: id, ...parsed },
-              }
-        );
-        if (response.succeeded) {
-          registeredTweets.push(id);
-          plusButton.innerHTML = '✓';
-          plusButton.removeEventListener('click', onClickPlusButton);
-        } else {
-          alert(`Failed: ${response.message}`);
-        }
-      };
-      plusButton.addEventListener('click', onClickPlusButton);
+      plusButton.onclick = () => onClickPlusButton(plusButton);
     }
     navigations[i].appendChild(plusButton);
   }
