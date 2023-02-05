@@ -5,10 +5,8 @@ import { Client } from "twitter-api-sdk";
 import { URL } from "url";
 import { CustomError } from "./error";
 import db from "../models/index";
-import { string } from "yargs";
 
 dotenv.config();
-const client = new Client(process.env.TWITTER_BEARER_TOKEN);
 
 interface TweetImage {
   type: string;
@@ -56,6 +54,8 @@ const uploadImages = (tweetId: string, buffers: Buffer[]) => {
 };
 
 export const addTweet = async (id: string) => {
+  const client = new Client(process.env.TWITTER_BEARER_TOKEN);
+
   // get a tweet
   let tweet;
   try {
