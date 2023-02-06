@@ -51,10 +51,10 @@ const DateTime = styled.p`
 
 interface TweetDisplayProps {
   selectedTweet: Tweet;
-  setKeyword: (value: string) => void;
+  updateKeyword: (value: string) => void;
 }
 
-const TweetDisplay = ({ selectedTweet, setKeyword }: TweetDisplayProps) => {
+const TweetDisplay = ({ selectedTweet, updateKeyword }: TweetDisplayProps) => {
   const url = selectedTweet
     ? `https://twitter.com/${selectedTweet.User.screenName}/status/${selectedTweet.id}`
     : "";
@@ -92,7 +92,7 @@ const TweetDisplay = ({ selectedTweet, setKeyword }: TweetDisplayProps) => {
       <header>
         <Name>{selectedTweet.User.name}</Name>
         <ScreenName
-          onClick={() => setKeyword(`@${selectedTweet.User.screenName}`)}
+          onClick={() => updateKeyword(`@${selectedTweet.User.screenName}`)}
         >
           @{selectedTweet.User.screenName}
         </ScreenName>

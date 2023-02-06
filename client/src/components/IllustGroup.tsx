@@ -6,15 +6,15 @@ import { getImageEndpoint, Tweet } from "@/utils/api";
 import { getImagePixel, loadImage, Color, DisplayOptions } from "@/utils/utils";
 
 const Wrapper = styled.div`
-  padding: 20px 0;
+  padding: 0 0;
   display: flex;
   gap: 10px;
   justify-content: space-between;
   align-items: flex-start;
 `;
 
-const Column = styled.div<{ columnCount: number; aspectRatio: number }>`
-  aspect-ratio: 1 / ${(props) => props.aspectRatio};
+const Column = styled.div<{ columnCount: number; height: number }>`
+  height: ${(props) => props.height}px;
   flex-basis: ${(props) => 100 / props.columnCount}%;
   display: flex;
   flex-direction: column;
@@ -75,42 +75,62 @@ const IllustGroup = ({
   setMousePoint,
   setSelectedTweetIds,
 }: IllustGroupProps) => {
-  const [aspectRatios, setAspectRatios] = useState<number[]>([]);
+  const [columnHeights, setColumnHeights] = useState<number[]>([]);
 
-  const { ref: wrapperRef, inView } = useInView({
+  const {
+    ref: wrapperRef,
+    inView,
+    entry: wrapperEntry,
+  } = useInView({
     rootMargin: "0px",
     triggerOnce: false,
   });
 
-  const getRatio = (tweet: Tweet) =>
+  let columnWidth = 0;
+  if (wrapperEntry) {
+    const rect = wrapperEntry.target.getBoundingClientRect();
+    columnWidth =
+      (rect.width - 10 * (displayOptions.columns - 1)) / displayOptions.columns;
+  }
+
+  const getImageRatio = (tweet: Tweet) =>
     displayOptions.isSquare
       ? 1
       : tweet.Images[0].height / tweet.Images[0].width;
 
-  const tweetRows = useMemo(() => {
+  const getImageHeight = (tweet: Tweet) => getImageRatio(tweet) * columnWidth;
+
+  const tweetColumns = useMemo(() => {
     const totalHeight = tweets
       .filter((tweet) => tweet.Images.length > 0)
-      .map((tweet) => getRatio(tweet))
+      .map((tweet) => getImageHeight(tweet))
       .reduce((previous, current) => previous + current, 0);
 
     let tweetsPerColumn: Tweet[][] = [[]];
-    let columnHeights = [0];
+    let tempColumnHeights = [0];
 
-    for (const tweet of tweets) {
-      tweetsPerColumn[tweetsPerColumn.length - 1]!.push(tweet);
-      columnHeights[columnHeights.length - 1] += getRatio(tweet);
-      if (
-        columnHeights[columnHeights.length - 1] >
-          totalHeight / displayOptions.columns &&
-        tweetsPerColumn.length < displayOptions.columns
-      ) {
+    for (let i = 0; i < tweets.length; i++) {
+      tweetsPerColumn.at(-1)!.push(tweets[i]);
+      tempColumnHeights[tempColumnHeights.length - 1] += getImageHeight(
+        tweets[i]
+      );
+
+      const exceedsHeight =
+        tempColumnHeights.at(-1)! > totalHeight / displayOptions.columns &&
+        tweetsPerColumn.length < displayOptions.columns;
+      // gap
+      if (exceedsHeight || i === tweets.length - 1) {
+        tempColumnHeights[tempColumnHeights.length - 1] +=
+          (tweetsPerColumn.at(-1)!.length - 1) * 10;
+      }
+      if (exceedsHeight) {
         tweetsPerColumn.push([]);
-        columnHeights.push(0);
+        tempColumnHeights.push(0);
       }
     }
-    setAspectRatios(columnHeights);
+    setColumnHeights(tempColumnHeights);
     return tweetsPerColumn;
-  }, [tweets, displayOptions]);
+  }, [tweets, displayOptions, columnWidth]);
 
   const onClickTweet = async (e: React.MouseEvent, id: string) => {
     // color picker
@@ -163,17 +183,19 @@ const IllustGroup = ({
 
   return (
     <Wrapper ref={wrapperRef}>
-      {tweetRows.map((row, i) => (
+      {tweetColumns.map((column, i) => (
         <Column
           columnCount={displayOptions.columns}
-          aspectRatio={aspectRatios[i]}
+          height={columnHeights[i]}
           key={i}
         >
           {inView ? (
-            row.map((tweet) => {
+            column.map((tweet) => {
               return (
                 <Illust
-                  aspectRatio={displayOptions.isSquare ? 1 : getRatio(tweet)}
+                  aspectRatio={
+                    displayOptions.isSquare ? 1 : getImageRatio(tweet)
+                  }
                   selected={selectedTweetIds.includes(tweet.id)}
                   onClick={(e) => onClickTweet(e, tweet.id)}
                   key={tweet.id}

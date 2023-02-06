@@ -22,6 +22,7 @@ import {
   switchAssociation,
   DisplayOptions,
   FilterMethod,
+  SearchParams,
 } from "./utils/utils";
 
 const SideNavWidth = 220;
@@ -86,12 +87,9 @@ const AddTweetWrapper = styled.div`
 `;
 
 const Home = () => {
-  const [searchParams, _] = useSearchParams();
-
   const [originalTweets, setOriginalTweets] = useState<Tweet[]>([]);
   const [deletedTweetIds, setDeletedTweetIds] = useState<string[]>([]);
   const [selectedTweetIds, setSelectedTweetIds] = useState<string[]>([]);
-  const [keyword, setKeyword] = useState<string>("");
   const [displayOptions, _setDisplayOptions] = useState<DisplayOptions>({
     isSquare: false,
     columns: 3,
@@ -102,6 +100,36 @@ const Home = () => {
   const setDisplayOptions = (value: DisplayOptions) => {
     localStorage.setItem("displayOptions", JSON.stringify(value));
     _setDisplayOptions(value);
+  };
+
+  // searchParams
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const updateSearchParams = ({
+    newFilterMethod,
+    newTags,
+    newKeyword,
+  }: SearchParams) => {
+    const tempTags = newTags || selectedTags;
+    const tempKeyword = newKeyword || keyword;
+    const params: { filterMethod: string; tags?: string; keyword?: string } = {
+      filterMethod: newFilterMethod || filterMethod,
+    };
+    if (tempTags.length > 0) {
+      params.tags = tempTags.join("+");
+    }
+    if (tempKeyword.length > 0) {
+      params.keyword = tempKeyword;
+    }
+    setSearchParams(params);
+  };
+
+  // keyword
+  const [keyword, setKeyword] = useState<string>("");
+
+  const updateKeyword = (value: string) => {
+    setKeyword(value);
+    updateSearchParams({ newKeyword: value });
   };
 
   // tag
@@ -183,6 +211,9 @@ const Home = () => {
           searchParams.get("filterMethod") === "and" ? "and" : "or"
         );
       }
+      if (searchParams.has("keyword")) {
+        setKeyword(searchParams.get("keyword")!);
+      }
 
       // tweet, tweet-tag
       setOriginalTweets(await getTweets());
@@ -208,11 +239,12 @@ const Home = () => {
           filterMethod={filterMethod}
           onlyUnrelated={onlyUnrelated}
           setSelectedTags={setSelectedTags}
-          setKeyword={setKeyword}
+          updateKeyword={updateKeyword}
           setFilterMethod={setFilterMethod}
           setOnlyUnrelated={setOnlyUnrelated}
           setSelectedTweetIds={setSelectedTweetIds}
           inSwitchAssociation={inSwitchAssociation}
+          updateSearchParams={updateSearchParams}
         />
       </SideNavWrapper>
       <Main>
@@ -237,7 +269,7 @@ const Home = () => {
         <TweetPanel
           selectedTweet={selectedTweet}
           displayOptions={displayOptions}
-          setKeyword={setKeyword}
+          updateKeyword={updateKeyword}
           setDisplayOptions={setDisplayOptions}
         />
       </TweetWrapper>
