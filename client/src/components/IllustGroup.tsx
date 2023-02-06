@@ -100,7 +100,7 @@ const IllustGroup = ({
 
   const getImageHeight = (tweet: Tweet) => getImageRatio(tweet) * columnWidth;
 
-  const tweetRows = useMemo(() => {
+  const tweetColumns = useMemo(() => {
     const totalHeight = tweets
       .filter((tweet) => tweet.Images.length > 0)
       .map((tweet) => getImageHeight(tweet))
@@ -130,7 +130,7 @@ const IllustGroup = ({
     }
     setColumnHeights(tempColumnHeights);
     return tweetsPerColumn;
-  }, [tweets, displayOptions]);
+  }, [tweets, displayOptions, columnWidth]);
 
   const onClickTweet = async (e: React.MouseEvent, id: string) => {
     // color picker
@@ -183,14 +183,14 @@ const IllustGroup = ({
 
   return (
     <Wrapper ref={wrapperRef}>
-      {tweetRows.map((row, i) => (
+      {tweetColumns.map((column, i) => (
         <Column
           columnCount={displayOptions.columns}
           height={columnHeights[i]}
           key={i}
         >
           {inView ? (
-            row.map((tweet) => {
+            column.map((tweet) => {
               return (
                 <Illust
                   aspectRatio={
