@@ -1,5 +1,4 @@
 import React from "react";
-import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import KeywordInput from "./KeywordInput";
 import Tag from "./Tag";
@@ -10,6 +9,7 @@ import {
   getUniqueCommonTag,
   splitCharacterTag,
   FilterMethod,
+  SearchParams,
 } from "@/utils/utils";
 
 const Wrapper = styled.nav`
@@ -118,11 +118,12 @@ interface SideNavProps {
   filterMethod: FilterMethod;
   onlyUnrelated: boolean;
   setSelectedTags: (value: string[]) => void;
-  setKeyword: (value: string) => void;
+  updateKeyword: (value: string) => void;
   setFilterMethod: (value: FilterMethod) => void;
   setOnlyUnrelated: (value: boolean) => void;
   setSelectedTweetIds: (value: string[]) => void;
   inSwitchAssociation: (tag: string) => void;
+  updateSearchParams: (params: SearchParams) => void;
 }
 
 const SideNav = ({
@@ -135,49 +136,20 @@ const SideNav = ({
   filterMethod,
   onlyUnrelated,
   setSelectedTags,
-  setKeyword,
+  updateKeyword,
   setFilterMethod,
   setOnlyUnrelated,
   setSelectedTweetIds,
   inSwitchAssociation,
+  updateSearchParams,
 }: SideNavProps) => {
-  const [_, setSearchParams] = useSearchParams();
-
-  const updateParams = ({
-    newFilterMethod,
-    newTags,
-    newKeyword,
-  }: {
-    newFilterMethod?: string;
-    newTags?: string[];
-    newKeyword?: string;
-  }) => {
-    const tempTags = newTags || selectedTags;
-    const tempKeyword = newKeyword || keyword;
-    const params: { filterMethod: string; tags?: string; keyword?: string } = {
-      filterMethod: newFilterMethod || filterMethod,
-    };
-    if (tempTags.length > 0) {
-      params.tags = tempTags.join("+");
-    }
-    if (tempKeyword.length > 0) {
-      params.keyword = tempKeyword;
-    }
-    setSearchParams(params);
-  };
-
-  const updateKeyword = (value: string) => {
-    setKeyword(value);
-    updateParams({ newKeyword: value });
-  };
-
   const switchSelect = (id: string) => {
     const tags = selectedTags.includes(id)
       ? selectedTags.filter((tag) => tag !== id)
       : [...selectedTags, id];
     const filteredTags = tags.filter((tag) => tag.length > 0);
     setSelectedTags(filteredTags);
-    updateParams({ newTags: filteredTags });
+    updateSearchParams({ newTags: filteredTags });
     setSelectedTweetIds([]);
   };
 
@@ -191,21 +163,20 @@ const SideNav = ({
         ? selectedTags.filter((tag) => splitCharacterTag(tag).work !== work)
         : Array.from(new Set([...selectedTags, ...tags]));
       setSelectedTags(newTags);
-      updateParams({ newTags });
+      updateSearchParams({ newTags });
       setSelectedTweetIds([]);
     }
   };
 
   const switchFilterMethod = (method: FilterMethod) => {
     setFilterMethod(method);
-    updateParams({ newFilterMethod: method });
+    updateSearchParams({ newFilterMethod: method });
     setSelectedTweetIds([]);
   };
 
   const clear = () => {
-    setKeyword("");
+    updateKeyword("");
     setSelectedTags([]);
-    setSearchParams({});
   };
 
   return (

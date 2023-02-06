@@ -22,19 +22,22 @@ const SettingsWrapper = styled.div`
 interface TweetProps {
   selectedTweet: Tweet | undefined;
   displayOptions: DisplayOptions;
-  setKeyword: (value: string) => void;
+  updateKeyword: (value: string) => void;
   setDisplayOptions: (value: DisplayOptions) => void;
 }
 
 const TweetPanel = ({
   selectedTweet,
   displayOptions,
-  setKeyword,
+  updateKeyword,
   setDisplayOptions,
 }: TweetProps) => (
   <Wrapper>
     {selectedTweet ? (
-      <TweetDisplay selectedTweet={selectedTweet} setKeyword={setKeyword} />
+      <TweetDisplay
+        selectedTweet={selectedTweet}
+        updateKeyword={updateKeyword}
+      />
     ) : (
       <SettingsWrapper>
         <Settings

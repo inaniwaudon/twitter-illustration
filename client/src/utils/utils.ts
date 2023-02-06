@@ -141,3 +141,10 @@ export const getImagePixel = async (
   );
   return [imgData.data[0], imgData.data[1], imgData.data[2]];
 };
+
+// search params
+export interface SearchParams {
+  newFilterMethod?: string;
+  newTags?: string[];
+  newKeyword?: string;
+}
