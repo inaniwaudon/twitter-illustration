@@ -6,7 +6,7 @@ import { getImageEndpoint, Tweet } from "@/utils/api";
 import { getImagePixel, loadImage, Color, DisplayOptions } from "@/utils/utils";
 
 const Wrapper = styled.div`
-  padding: 20px 0;
+  padding: 0 0;
   display: flex;
   gap: 10px;
   justify-content: space-between;

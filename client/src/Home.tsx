@@ -183,6 +183,9 @@ const Home = () => {
           searchParams.get("filterMethod") === "and" ? "and" : "or"
         );
       }
+      if (searchParams.has("keyword")) {
+        setKeyword(searchParams.get("keyword")!);
+      }
 
       // tweet, tweet-tag
       setOriginalTweets(await getTweets());

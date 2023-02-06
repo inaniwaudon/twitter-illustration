@@ -1,16 +1,14 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import KeywordInput from "./KeywordInput";
 import Tag from "./Tag";
 import { linkColor } from "@/const/styles";
-import { addTweetTag, deleteTweetTag, TweetToTag, Work } from "@/utils/api";
+import { Work } from "@/utils/api";
 import {
-  getAllTags,
   getCharacterTag,
   getUniqueCommonTag,
   splitCharacterTag,
-  switchAssociation,
   FilterMethod,
 } from "@/utils/utils";
 
@@ -144,23 +142,33 @@ const SideNav = ({
   inSwitchAssociation,
 }: SideNavProps) => {
   const [_, setSearchParams] = useSearchParams();
-  const allTags = getAllTags(works, commonTags);
 
   const updateParams = ({
     newFilterMethod,
     newTags,
+    newKeyword,
   }: {
     newFilterMethod?: string;
     newTags?: string[];
+    newKeyword?: string;
   }) => {
     const tempTags = newTags || selectedTags;
-    const params: { filterMethod: string; tags?: string } = {
+    const tempKeyword = newKeyword || keyword;
+    const params: { filterMethod: string; tags?: string; keyword?: string } = {
       filterMethod: newFilterMethod || filterMethod,
     };
     if (tempTags.length > 0) {
       params.tags = tempTags.join("+");
     }
+    if (tempKeyword.length > 0) {
+      params.keyword = tempKeyword;
+    }
     setSearchParams(params);
+  };
+
+  const updateKeyword = (value: string) => {
+    setKeyword(value);
+    updateParams({ newKeyword: value });
   };
 
   const switchSelect = (id: string) => {
@@ -210,7 +218,7 @@ const SideNav = ({
               type="search"
               value={keyword}
               placeholder="ツイート本文から検索"
-              onChange={(e) => setKeyword(e.target.value)}
+              onChange={(e) => updateKeyword(e.target.value)}
             />
           </label>
         </div>
