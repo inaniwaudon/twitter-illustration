@@ -9,6 +9,18 @@ const Wrapper = styled.div`
   min-height: calc(100vh - 40px);
 `;
 
+const Header = styled.header`
+  color: #666;
+  font-size: 14px;
+  margin: 14px 0 10px 0;
+`;
+
+const Result = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 20;
+`;
+
 interface IllustListProps {
   originalTweets: Tweet[];
   deletedTweetIds: string[];
@@ -109,27 +121,36 @@ const IllustList = ({
     for (let i = 0; i < Math.ceil(filteredTweets.length / n); i++) {
       array.push(filteredTweets.slice(i * n, (i + 1) * n));
     }
-    console.log(array);
     return array;
   }, [filteredTweets, displayOptions.tweetsPerPage]);
 
   return (
     <>
       <Wrapper>
-        {splitedTweets.map((tweets, index) => (
-          <IllustGroup
-            isShiftKeyPressed={isShiftKeyPressed}
-            pixelColor={pixelColor}
-            mousePoint={mousePoint}
-            selectedTweetIds={selectedTweetIds}
-            tweets={tweets}
-            displayOptions={displayOptions}
-            key={index}
-            setPixelColor={setPixelColor}
-            setMousePoint={setMousePoint}
-            setSelectedTweetIds={setSelectedTweetIds}
-          />
-        ))}
+        <Header>
+          {filteredTweets.length} 件（
+          {filteredTweets.reduce(
+            (previous, tweet) => previous + tweet.Images.length,
+            0
+          )}{" "}
+          枚）
+        </Header>
+        <Result>
+          {splitedTweets.map((tweets, index) => (
+            <IllustGroup
+              isShiftKeyPressed={isShiftKeyPressed}
+              pixelColor={pixelColor}
+              mousePoint={mousePoint}
+              selectedTweetIds={selectedTweetIds}
+              tweets={tweets}
+              displayOptions={displayOptions}
+              key={index}
+              setPixelColor={setPixelColor}
+              setMousePoint={setMousePoint}
+              setSelectedTweetIds={setSelectedTweetIds}
+            />
+          ))}
+        </Result>
       </Wrapper>
       {mousePoint && pixelColor ? (
         <ColorTags
