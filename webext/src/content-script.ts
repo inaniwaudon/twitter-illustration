@@ -50,7 +50,7 @@ const parseHTML = (tweet: Element, tweetPhotos: Element[]) => {
   }
 
   // get user information
-  const userNames = tweet.querySelector('[data-testid="User-Names"]');
+  const userNames = tweet.querySelector('[data-testid="User-Name"]');
   userName = userNames!.childNodes[0].textContent;
   screenName = userNames!.childNodes[1].textContent;
 
