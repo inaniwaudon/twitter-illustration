@@ -69,7 +69,7 @@ PORT=3030
 ["タグ1", "タグ2", "タグ3"]
 ```
 
-起動
+インストールおよび起動には以下のコマンドを実行します。
 
 ```bash
 cd backend
@@ -80,6 +80,12 @@ npx sequelize-cli-esm db:migrate
 
 # localhost:3030 で起動
 yarn run start
+```
+
+画像を即座に保存するために、バックエンドを起動するエイリアスを設定しておくと便利です。
+
+```bash
+alias twi="cd ~/documents/web/twitter-illustration/backend && yarn run start"
 ```
 
 ## ブラウザ拡張機能
