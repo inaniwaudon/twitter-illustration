@@ -5,7 +5,10 @@ const { DefinePlugin, EnvironmentPlugin } = require('webpack');
 const process = require('process');
 
 module.exports = () => {
-  const env = dotenv.config().parsed || { USE_API: 'false' };
+  const env = dotenv.config().parsed || {
+    BACKEND_URL: 'http://localhost:3030',
+    USE_API: 'false',
+  };
 
   return {
     mode: process.env.NODE_ENV || 'development',
@@ -33,11 +36,22 @@ module.exports = () => {
     plugins: [
       new EnvironmentPlugin(['TARGET_BROWSER']),
       new CopyPlugin({
+        patterns: [{ from: 'public/style.css' }],
+      }),
+      new CopyPlugin({
         patterns: [
-          { from: 'public/style.css' },
-          process.env.TARGET_BROWSER === 'firefox'
-            ? { from: 'public/manifest.firefox.json', to: 'manifest.json' }
-            : { from: 'public/manifest.json' },
+          {
+            from:
+              process.env.TARGET_BROWSER === 'firefox'
+                ? 'public/manifest.firefox.json'
+                : 'public/manifest.json',
+            to: 'manifest.json',
+            transform(content) {
+              return content
+                .toString()
+                .replace('$BACKEND_URL', process.env.BACKEND_URL);
+            },
+          },
         ],
       }),
       new DefinePlugin({
