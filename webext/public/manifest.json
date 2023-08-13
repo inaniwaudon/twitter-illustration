@@ -13,5 +13,5 @@
   "background": {
     "service_worker": "background.js"
   },
-  "host_permissions": ["http://localhost:3030/*"]
+  "host_permissions": ["$BACKEND_URL/*"]
 }

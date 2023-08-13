@@ -1,7 +1,7 @@
 import { MessageRequest, MessageResponse } from './request';
 import browser from 'webextension-polyfill';
 
-const BACKEND_URL = 'http://localhost:3030';
+const backendUrl = process.env.BACKEND_URL;
 
 const generateErrorMessage = (
   type: 'serverError' | 'networkError' | 'invalidMessage'
@@ -25,7 +25,7 @@ browser.runtime.onMessage.addListener(
         'id' in message.body
       ) {
         try {
-          const response = await fetch(`${BACKEND_URL}/tweet`, {
+          const response = await fetch(`${backendUrl}/tweet`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ browser.runtime.onMessage.addListener(
         ].every((field) => field in message.body)
       ) {
         try {
-          const response = await fetch(`${BACKEND_URL}/parsed-tweet`, {
+          const response = await fetch(`${backendUrl}/parsed-tweet`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ browser.runtime.onMessage.addListener(
       // get the stored tweet list
       if (message.type === 'get-tweets') {
         try {
-          const response = await fetch(`${BACKEND_URL}/tweet`, {
+          const response = await fetch(`${backendUrl}/tweet`, {
             method: 'GET',
           });
           if (!response.ok) {
