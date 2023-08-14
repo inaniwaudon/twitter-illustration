@@ -27,12 +27,16 @@ const getImagesBuffers = async (srcs: string[]) => {
   const imageBuffers: Buffer[] = [];
   try {
     for (const src of srcs) {
+      // fetch a large image
       const parsedUrl = new URL(src);
-      parsedUrl.searchParams.set("name", "orig");
+      parsedUrl.searchParams.set("name", "large");
       const originalSrc = parsedUrl.toString();
 
       const response = await fetch(originalSrc);
       const arrayBuffer = await response.arrayBuffer();
+      if (arrayBuffer.byteLength === 0) {
+        throw new CustomError(500, "Cannot to fetch images");
+      }
       imageBuffers.push(Buffer.from(arrayBuffer));
     }
   } catch (e) {
@@ -53,6 +57,7 @@ const uploadImages = (tweetId: string, buffers: Buffer[]) => {
   }
 };
 
+// TODO: deprecated
 export const addTweet = async (id: string) => {
   const client = new Client(process.env.TWITTER_BEARER_TOKEN);
 
@@ -154,7 +159,8 @@ export const addParsedTweet = async (
   let imageSizes: { width: number; height: number }[] = [];
   try {
     imageSizes = imageBuffers.map((buffer) => sizeOf(buffer));
-  } catch {
+  } catch (e) {
+    console.log(e);
     throw new CustomError(500, "Failed to process images.");
   }
   uploadImages(tweetId, imageBuffers);
